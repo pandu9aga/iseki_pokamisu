@@ -5,15 +5,45 @@ namespace App\Http\Controllers;
 use App\Imports\DataImport;
 use App\Models\ImportData;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use Yajra\DataTables\Facades\DataTables;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class DataController extends Controller
 {
+    protected $kategoriList = [
+        'lupa dirakit', 'pengencangan', 'check sheet', 'cek pen',
+        'perakitan', 'penyetelan', 'cat', 'masking', 'part',
+        'telat supply', 'telat request', 'lain-lain'
+    ];
+
+    protected $teamList = [
+        'MC', 'QC', 'Line A', 'Line B', 'Transmisi', 'Engine',
+        'Sub', 'Main', 'Inspeksi', 'Mower', 'DST'
+    ];
+
+    public function getPICList()
+    {
+        try {
+            return DB::connection('mysql_rifa')
+                ->table('employees')
+                ->whereNotNull('nama')
+                ->where('nama', '!=', '')
+                ->orderBy('nama')
+                ->pluck('nama')
+                ->toArray();
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+
     public function index()
     {
-        return view('pokamisu.index');
+        $kategoriList = $this->kategoriList;
+        $teamList = $this->teamList;
+        $picList = $this->getPICList();
+        return view('pokamisu.index', compact('kategoriList', 'teamList', 'picList'));
     }
 
     public function importForm()
@@ -105,7 +135,13 @@ class DataController extends Controller
             }
         }
 
-        $dataCols = ['no','no_instruksi','tipe_traktor','no_produksi','sign','permasalahan','keterangan','jenis_penanganan','pic_repair','kategori','team','pic','tanggal'];
+        if ($request->has('selectFilters')) {
+            foreach ($request->selectFilters as $col => $val) {
+                if ($val !== '') {
+                    $query->where($col, $val);
+                }
+            }
+        }
 
         return DataTables::of($query)
             ->addColumn('checkbox', function ($row) {
@@ -148,13 +184,16 @@ class DataController extends Controller
                 return '<div class="cell-wrap"><span class="cell-content" data-id="' . $row->id . '" data-column="pic_repair" data-color="' . $row->pic_repair_color . '" style="color:' . $row->pic_repair_color . '">' . e($row->pic_repair) . '</span></div>';
             })
             ->editColumn('kategori', function ($row) {
-                return '<div class="cell-wrap"><span class="cell-content" data-id="' . $row->id . '" data-column="kategori" data-color="' . $row->kategori_color . '" style="color:' . $row->kategori_color . '">' . e($row->kategori) . '</span></div>';
+                $opts = implode(',', $this->kategoriList);
+                return '<div class="cell-wrap"><span class="cell-content is-select" data-select="kategori" data-options="' . $opts . '" data-id="' . $row->id . '" data-column="kategori" data-color="' . $row->kategori_color . '" style="color:' . $row->kategori_color . '">' . e($row->kategori) . '</span></div>';
             })
             ->editColumn('team', function ($row) {
-                return '<div class="cell-wrap"><span class="cell-content" data-id="' . $row->id . '" data-column="team" data-color="' . $row->team_color . '" style="color:' . $row->team_color . '">' . e($row->team) . '</span></div>';
+                $opts = implode(',', $this->teamList);
+                return '<div class="cell-wrap"><span class="cell-content is-select" data-select="team" data-options="' . $opts . '" data-id="' . $row->id . '" data-column="team" data-color="' . $row->team_color . '" style="color:' . $row->team_color . '">' . e($row->team) . '</span></div>';
             })
             ->editColumn('pic', function ($row) {
-                return '<div class="cell-wrap"><span class="cell-content" data-id="' . $row->id . '" data-column="pic" data-color="' . $row->pic_color . '" style="color:' . $row->pic_color . '">' . e($row->pic) . '</span></div>';
+                $opts = implode(',', $this->getPICList());
+                return '<div class="cell-wrap"><span class="cell-content is-select" data-select="pic" data-options="' . $opts . '" data-id="' . $row->id . '" data-column="pic" data-color="' . $row->pic_color . '" style="color:' . $row->pic_color . '">' . e($row->pic) . '</span></div>';
             })
             ->filterColumn('no', function ($query, $keyword) {
                 $query->where('no', 'like', "%{$keyword}%");
