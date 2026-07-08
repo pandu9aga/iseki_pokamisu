@@ -13,12 +13,7 @@ class DataController extends Controller
 {
     public function index()
     {
-        $columns = [
-            'no', 'instruksi', 'tipe_traktor', 'no_produksi',
-            'sign', 'permasalahan', 'keterangan', 'jenis_penanganan',
-            'pic_repair', 'kategori', 'team', 'pic'
-        ];
-        return view('pokamisu.index', compact('columns'));
+        return view('pokamisu.index');
     }
 
     public function importForm()
@@ -34,41 +29,49 @@ class DataController extends Controller
         $spreadsheet = IOFactory::load($file->getPathname());
         $worksheet = $spreadsheet->getActiveSheet();
 
+        $tanggal = null;
+        try {
+            $b7 = $worksheet->getCell('B7')->getValue();
+            if ($b7 && preg_match('/\d{4}-\d{2}-\d{2}/', $b7, $m)) {
+                $tanggal = $m[0];
+            }
+        } catch (\Exception $e) {}
+
         $rows = $worksheet->toArray();
-        if (count($rows) < 2) {
-            return back()->with('error', 'File Excel kosong atau hanya berisi header.');
+        if (count($rows) < 9) {
+            return back()->with('error', 'File Excel tidak memiliki data di baris 9 atau lebih.');
         }
 
-        $rawHeaders = $rows[0];
-        $expected = [
-            'no', 'instruksi', 'tipe_traktor', 'no_produksi',
-            'sign', 'permasalahan', 'keterangan', 'jenis_penanganan',
-            'pic_repair', 'kategori', 'team', 'pic'
+        $cols = [
+            1 => 'no',       // B
+            2 => 'no_instruksi', // C
+            3 => 'tipe_traktor', // D
+            4 => 'no_produksi',  // E
+            5 => 'sign',     // F
+            6 => 'permasalahan', // G
+            7 => 'keterangan', // H
+            8 => 'jenis_penanganan', // I
+            9 => 'pic_repair', // J
         ];
 
-        $colMap = $this->mapExcelHeaders($rawHeaders, $expected);
-
-        $colLetters = 'ABCDEFGHIJKL';
-        $colLetterMap = [];
-        foreach ($expected as $i => $col) {
-            $colLetterMap[$col] = $colLetters[$i] ?? '';
-        }
+        $colLetters = [1=>'B',2=>'C',3=>'D',4=>'E',5=>'F',6=>'G',7=>'H',8=>'I',9=>'J'];
 
         $inserted = 0;
         foreach ($rows as $rowIdx => $row) {
-            if ($rowIdx === 0) continue;
+            if ($rowIdx < 8) continue;
 
-            $data = [];
-            foreach ($expected as $col) {
-                $dbCol = str_replace(' ', '_', $col);
-                $idx = $colMap[$col];
-                $value = ($idx !== false && isset($row[$idx])) ? $row[$idx] : null;
+            $data = ['tanggal' => $tanggal, 'tanggal_color' => '#000000'];
+
+            foreach ($cols as $colIdx => $dbCol) {
+                $value = isset($row[$colIdx]) ? $row[$colIdx] : null;
+                if (is_string($value)) $value = trim($value);
+                if ($value === '') $value = null;
                 $data[$dbCol] = $value;
 
                 $excelRow = $rowIdx + 1;
-                $letter = $colLetterMap[$col];
+                $letter = $colLetters[$colIdx];
                 $color = '#000000';
-                if ($letter && $value !== null && $value !== '') {
+                if ($letter && $value !== null) {
                     try {
                         $cell = $worksheet->getCell($letter . $excelRow);
                         $fontColor = $cell->getStyle()->getFont()->getColor();
@@ -81,45 +84,14 @@ class DataController extends Controller
                 $data[$dbCol . '_color'] = $color;
             }
 
-            ImportData::create($data);
-            $inserted++;
+            if (array_filter(array_intersect_key($data, array_flip(['no','no_instruksi','tipe_traktor','no_produksi','sign','permasalahan','keterangan','jenis_penanganan','pic_repair'])), function($v) { return $v !== null; })) {
+                ImportData::create($data);
+                $inserted++;
+            }
         }
 
         return redirect()->route('data.index')
             ->with('success', "Berhasil import $inserted baris data.");
-    }
-
-    protected function mapExcelHeaders(array $rawHeaders, array $expected): array
-    {
-        $map = [];
-        $normalizedHeaders = [];
-        foreach ($rawHeaders as $i => $h) {
-            $normalizedHeaders[$i] = $this->normalizeHeader((string) $h);
-        }
-
-        foreach ($expected as $col) {
-            $search = $this->normalizeHeader($col);
-            $found = false;
-            foreach ($normalizedHeaders as $i => $nh) {
-                if ($nh === $search) {
-                    $map[$col] = $i;
-                    $found = true;
-                    break;
-                }
-            }
-            if (!$found) {
-                $map[$col] = false;
-            }
-        }
-
-        return $map;
-    }
-
-    protected function normalizeHeader(string $header): string
-    {
-        $h = preg_replace('/[.\s_-]+/', '', $header);
-        $h = preg_replace('/[^a-zA-Z0-9]/', '', $h);
-        return strtolower($h);
     }
 
     public function dataTable(Request $request)
@@ -133,6 +105,8 @@ class DataController extends Controller
             }
         }
 
+        $dataCols = ['no','no_instruksi','tipe_traktor','no_produksi','sign','permasalahan','keterangan','jenis_penanganan','pic_repair','kategori','team','pic','tanggal'];
+
         return DataTables::of($query)
             ->addColumn('checkbox', function ($row) {
                 return '<input type="checkbox" class="row-checkbox" value="' . $row->id . '">';
@@ -142,47 +116,51 @@ class DataController extends Controller
                             <i class="bi bi-trash"></i>
                         </button>';
             })
-            ->editColumn('no', function ($row) {
-                return '<span class="cell-content" data-id="' . $row->id . '" data-column="no" data-color="' . $row->no_color . '" style="cursor:pointer;color:' . $row->no_color . '">' . e($row->no) . '</span>';
+            ->addColumn('tanggal_display', function ($row) {
+                $c = $row->tanggal_color ?? '#000000';
+                return '<div class="cell-wrap"><span class="cell-content" data-id="' . $row->id . '" data-column="tanggal" data-color="' . $c . '" style="color:' . $c . '">' . e($row->tanggal) . '</span></div>';
             })
-            ->editColumn('instruksi', function ($row) {
-                return '<span class="cell-content" data-id="' . $row->id . '" data-column="instruksi" data-color="' . $row->instruksi_color . '" style="cursor:pointer;color:' . $row->instruksi_color . '">' . e($row->instruksi) . '</span>';
+            ->editColumn('no', function ($row) {
+                return '<div class="cell-wrap"><span class="cell-content" data-id="' . $row->id . '" data-column="no" data-color="' . $row->no_color . '" style="color:' . $row->no_color . '">' . e($row->no) . '</span></div>';
+            })
+            ->editColumn('no_instruksi', function ($row) {
+                return '<div class="cell-wrap"><span class="cell-content" data-id="' . $row->id . '" data-column="no_instruksi" data-color="' . $row->no_instruksi_color . '" style="color:' . $row->no_instruksi_color . '">' . e($row->no_instruksi) . '</span></div>';
             })
             ->editColumn('tipe_traktor', function ($row) {
-                return '<span class="cell-content" data-id="' . $row->id . '" data-column="tipe_traktor" data-color="' . $row->tipe_traktor_color . '" style="cursor:pointer;color:' . $row->tipe_traktor_color . '">' . e($row->tipe_traktor) . '</span>';
+                return '<div class="cell-wrap"><span class="cell-content" data-id="' . $row->id . '" data-column="tipe_traktor" data-color="' . $row->tipe_traktor_color . '" style="color:' . $row->tipe_traktor_color . '">' . e($row->tipe_traktor) . '</span></div>';
             })
             ->editColumn('no_produksi', function ($row) {
-                return '<span class="cell-content" data-id="' . $row->id . '" data-column="no_produksi" data-color="' . $row->no_produksi_color . '" style="cursor:pointer;color:' . $row->no_produksi_color . '">' . e($row->no_produksi) . '</span>';
+                return '<div class="cell-wrap"><span class="cell-content" data-id="' . $row->id . '" data-column="no_produksi" data-color="' . $row->no_produksi_color . '" style="color:' . $row->no_produksi_color . '">' . e($row->no_produksi) . '</span></div>';
             })
             ->editColumn('sign', function ($row) {
-                return '<span class="cell-content" data-id="' . $row->id . '" data-column="sign" data-color="' . $row->sign_color . '" style="cursor:pointer;color:' . $row->sign_color . '">' . e($row->sign) . '</span>';
+                return '<div class="cell-wrap"><span class="cell-content" data-id="' . $row->id . '" data-column="sign" data-color="' . $row->sign_color . '" style="color:' . $row->sign_color . '">' . e($row->sign) . '</span></div>';
             })
             ->editColumn('permasalahan', function ($row) {
-                return '<span class="cell-content" data-id="' . $row->id . '" data-column="permasalahan" data-color="' . $row->permasalahan_color . '" style="cursor:pointer;color:' . $row->permasalahan_color . '">' . e($row->permasalahan) . '</span>';
+                return '<div class="cell-wrap"><span class="cell-content" data-id="' . $row->id . '" data-column="permasalahan" data-color="' . $row->permasalahan_color . '" style="color:' . $row->permasalahan_color . '">' . e($row->permasalahan) . '</span></div>';
             })
             ->editColumn('keterangan', function ($row) {
-                return '<span class="cell-content" data-id="' . $row->id . '" data-column="keterangan" data-color="' . $row->keterangan_color . '" style="cursor:pointer;color:' . $row->keterangan_color . '">' . e($row->keterangan) . '</span>';
+                return '<div class="cell-wrap"><span class="cell-content" data-id="' . $row->id . '" data-column="keterangan" data-color="' . $row->keterangan_color . '" style="color:' . $row->keterangan_color . '">' . e($row->keterangan) . '</span></div>';
             })
             ->editColumn('jenis_penanganan', function ($row) {
-                return '<span class="cell-content" data-id="' . $row->id . '" data-column="jenis_penanganan" data-color="' . $row->jenis_penanganan_color . '" style="cursor:pointer;color:' . $row->jenis_penanganan_color . '">' . e($row->jenis_penanganan) . '</span>';
+                return '<div class="cell-wrap"><span class="cell-content" data-id="' . $row->id . '" data-column="jenis_penanganan" data-color="' . $row->jenis_penanganan_color . '" style="color:' . $row->jenis_penanganan_color . '">' . e($row->jenis_penanganan) . '</span></div>';
             })
             ->editColumn('pic_repair', function ($row) {
-                return '<span class="cell-content" data-id="' . $row->id . '" data-column="pic_repair" data-color="' . $row->pic_repair_color . '" style="cursor:pointer;color:' . $row->pic_repair_color . '">' . e($row->pic_repair) . '</span>';
+                return '<div class="cell-wrap"><span class="cell-content" data-id="' . $row->id . '" data-column="pic_repair" data-color="' . $row->pic_repair_color . '" style="color:' . $row->pic_repair_color . '">' . e($row->pic_repair) . '</span></div>';
             })
             ->editColumn('kategori', function ($row) {
-                return '<span class="cell-content" data-id="' . $row->id . '" data-column="kategori" data-color="' . $row->kategori_color . '" style="cursor:pointer;color:' . $row->kategori_color . '">' . e($row->kategori) . '</span>';
+                return '<div class="cell-wrap"><span class="cell-content" data-id="' . $row->id . '" data-column="kategori" data-color="' . $row->kategori_color . '" style="color:' . $row->kategori_color . '">' . e($row->kategori) . '</span></div>';
             })
             ->editColumn('team', function ($row) {
-                return '<span class="cell-content" data-id="' . $row->id . '" data-column="team" data-color="' . $row->team_color . '" style="cursor:pointer;color:' . $row->team_color . '">' . e($row->team) . '</span>';
+                return '<div class="cell-wrap"><span class="cell-content" data-id="' . $row->id . '" data-column="team" data-color="' . $row->team_color . '" style="color:' . $row->team_color . '">' . e($row->team) . '</span></div>';
             })
             ->editColumn('pic', function ($row) {
-                return '<span class="cell-content" data-id="' . $row->id . '" data-column="pic" data-color="' . $row->pic_color . '" style="cursor:pointer;color:' . $row->pic_color . '">' . e($row->pic) . '</span>';
+                return '<div class="cell-wrap"><span class="cell-content" data-id="' . $row->id . '" data-column="pic" data-color="' . $row->pic_color . '" style="color:' . $row->pic_color . '">' . e($row->pic) . '</span></div>';
             })
             ->filterColumn('no', function ($query, $keyword) {
                 $query->where('no', 'like', "%{$keyword}%");
             })
-            ->filterColumn('instruksi', function ($query, $keyword) {
-                $query->where('instruksi', 'like', "%{$keyword}%");
+            ->filterColumn('no_instruksi', function ($query, $keyword) {
+                $query->where('no_instruksi', 'like', "%{$keyword}%");
             })
             ->filterColumn('tipe_traktor', function ($query, $keyword) {
                 $query->where('tipe_traktor', 'like', "%{$keyword}%");
@@ -214,7 +192,10 @@ class DataController extends Controller
             ->filterColumn('pic', function ($query, $keyword) {
                 $query->where('pic', 'like', "%{$keyword}%");
             })
-            ->rawColumns(['checkbox', 'action', 'no', 'instruksi', 'tipe_traktor', 'no_produksi', 'sign', 'permasalahan', 'keterangan', 'jenis_penanganan', 'pic_repair', 'kategori', 'team', 'pic'])
+            ->filterColumn('tanggal', function ($query, $keyword) {
+                $query->where('tanggal', 'like', "%{$keyword}%");
+            })
+            ->rawColumns(['checkbox', 'action', 'tanggal_display', 'no', 'no_instruksi', 'tipe_traktor', 'no_produksi', 'sign', 'permasalahan', 'keterangan', 'jenis_penanganan', 'pic_repair', 'kategori', 'team', 'pic'])
             ->make(true);
     }
 
@@ -254,7 +235,8 @@ class DataController extends Controller
         ]);
 
         $record = ImportData::findOrFail($request->id);
-        $record->{$request->column} = $request->value;
+        $val = $request->value;
+        $record->{$request->column} = ($val === '') ? null : $val;
         $record->save();
 
         return response()->json(['success' => true]);

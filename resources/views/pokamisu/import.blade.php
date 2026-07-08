@@ -28,8 +28,12 @@
             </div>
             <div class="card-body">
                 <div class="alert alert-info">
-                    <strong>Format Kolom Excel (header baris pertama):</strong><br>
-                    No | Instruksi | Tipe Traktor | No Produksi | Sign | Permasalahan | Keterangan | Jenis Penanganan | PIC Repair | Kategori | Team | PIC
+                    <strong>Format Excel:</strong><br>
+                    <ul class="mb-0">
+                        <li>Cell <strong>B7</strong> berisi: <code>List Permasalahan Traktor Tgl: YYYY-MM-DD</code> (tanggal otomatis diekstrak)</li>
+                        <li>Header baris <strong>8</strong>: No | No Instruksi | Tipe Traktor | No. Produksi | Sign | Permasalahan | Keterangan | Jenis Penanganan | PIC Repair</li>
+                        <li>Data mulai dari <strong>baris 9</strong> (B9 = No, C9 = No Instruksi, ..., J9 = PIC Repair)</li>
+                    </ul>
                 </div>
 
                 <form action="{{ route('data.import.store') }}" method="POST" enctype="multipart/form-data">

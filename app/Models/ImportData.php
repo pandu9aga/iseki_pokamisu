@@ -10,7 +10,7 @@ class ImportData extends Model
 
     protected $fillable = [
         'no', 'no_color',
-        'instruksi', 'instruksi_color',
+        'no_instruksi', 'no_instruksi_color',
         'tipe_traktor', 'tipe_traktor_color',
         'no_produksi', 'no_produksi_color',
         'sign', 'sign_color',
@@ -21,5 +21,6 @@ class ImportData extends Model
         'kategori', 'kategori_color',
         'team', 'team_color',
         'pic', 'pic_color',
+        'tanggal', 'tanggal_color',
     ];
 }

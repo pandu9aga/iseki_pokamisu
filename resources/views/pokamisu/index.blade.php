@@ -4,19 +4,6 @@
 
 @push('styles')
 <style>
-    .color-swatch {
-        display: inline-block;
-        width: 16px;
-        height: 16px;
-        border-radius: 3px;
-        border: 1px solid #ddd;
-        cursor: pointer;
-        vertical-align: middle;
-        margin-left: 4px;
-    }
-    .color-swatch:hover {
-        transform: scale(1.2);
-    }
     #table1 thead tr.filters th {
         vertical-align: top;
         padding: 6px 4px;
@@ -36,20 +23,27 @@
         border: 1px solid #ddd;
         border-radius: 3px;
     }
-    #table1 .cell-content {
-        display: inline-block;
-        min-height: 20px;
+    #table1 td {
+        position: relative;
+        min-height: 28px;
+    }
+    #table1 .cell-wrap {
+        display: block;
+        min-height: 24px;
+        width: 100%;
         cursor: pointer;
+    }
+    #table1 .cell-wrap .cell-content {
         border-bottom: 1px dashed transparent;
         transition: border-color 0.2s;
     }
-    #table1 .cell-content:hover {
+    #table1 .cell-wrap:hover .cell-content {
         border-bottom-color: #aaa;
     }
-    #table1 .cell-content.editing {
+    #table1 .cell-wrap.editing .cell-content {
         border-bottom-color: transparent;
     }
-    #table1 .cell-content .edit-input {
+    #table1 .cell-wrap .edit-input {
         width: 100%;
         border: 1px solid #435ebe;
         border-radius: 3px;
@@ -118,9 +112,6 @@
         margin-top: 2px;
         width: 100%;
     }
-    .dataTables_wrapper .dt-buttons {
-        margin-bottom: 8px;
-    }
 </style>
 @endpush
 
@@ -130,7 +121,7 @@
         <div class="row">
             <div class="col-12 col-md-6 order-md-1 order-last">
                 <h3>Data Table</h3>
-                <p class="text-subtitle text-muted">Kelola data import dengan filter, edit, dan color</p>
+                <p class="text-subtitle text-muted">Kelola data pokamisu</p>
             </div>
             <div class="col-12 col-md-6 order-md-2 order-first">
                 <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
@@ -147,7 +138,7 @@
         <div class="card">
             <div class="card-header">
                 <div class="d-flex justify-content-between align-items-center">
-                    <h4 class="card-title mb-0">Data Import</h4>
+                    <h4 class="card-title mb-0">Data Pokamisu</h4>
                     <a href="{{ route('data.import.form') }}" class="btn btn-primary btn-sm">
                         <i class="bi bi-plus-lg"></i> Import Excel
                     </a>
@@ -160,9 +151,10 @@
                     <div class="d-flex align-items-center gap-2">
                         <label class="form-label mb-0">Change Color:</label>
                         <input type="color" id="batchColorPicker" value="#ff0000">
-                        <select id="batchColumnSelect" class="form-select form-select-sm" multiple style="min-width:160px;max-height:120px">
+                        <select id="batchColumnSelect" class="form-select form-select-sm" multiple style="min-width:180px;max-height:150px">
+                            <option value="tanggal">Tanggal</option>
                             <option value="no">No</option>
-                            <option value="instruksi">Instruksi</option>
+                            <option value="no_instruksi">No Instruksi</option>
                             <option value="tipe_traktor">Tipe Traktor</option>
                             <option value="no_produksi">No Produksi</option>
                             <option value="sign">Sign</option>
@@ -183,8 +175,9 @@
                         <thead>
                             <tr>
                                 <th style="width:40px"><input type="checkbox" id="selectAll"></th>
+                                <th>Tanggal</th>
                                 <th>No</th>
-                                <th>Instruksi</th>
+                                <th>No Instruksi</th>
                                 <th>Tipe Traktor</th>
                                 <th>No Produksi</th>
                                 <th>Sign</th>
@@ -200,76 +193,56 @@
                             <tr class="filters">
                                 <th></th>
                                 <th>
+                                    <input type="text" class="column-filter" placeholder="Cari Tgl">
+                                    <select class="color-filter dt-col-filter" data-column="tanggal"><option value="">All Colors</option></select>
+                                </th>
+                                <th>
                                     <input type="text" class="column-filter" placeholder="Cari No">
-                                    <select class="color-filter form-select form-select-sm dt-col-filter" data-column="no">
-                                        <option value="">All Colors</option>
-                                    </select>
+                                    <select class="color-filter dt-col-filter" data-column="no"><option value="">All Colors</option></select>
                                 </th>
                                 <th>
                                     <input type="text" class="column-filter" placeholder="Cari Instruksi">
-                                    <select class="color-filter form-select form-select-sm dt-col-filter" data-column="instruksi">
-                                        <option value="">All Colors</option>
-                                    </select>
+                                    <select class="color-filter dt-col-filter" data-column="no_instruksi"><option value="">All Colors</option></select>
                                 </th>
                                 <th>
                                     <input type="text" class="column-filter" placeholder="Cari Tipe">
-                                    <select class="color-filter form-select form-select-sm dt-col-filter" data-column="tipe_traktor">
-                                        <option value="">All Colors</option>
-                                    </select>
+                                    <select class="color-filter dt-col-filter" data-column="tipe_traktor"><option value="">All Colors</option></select>
                                 </th>
                                 <th>
                                     <input type="text" class="column-filter" placeholder="Cari No Produksi">
-                                    <select class="color-filter form-select form-select-sm dt-col-filter" data-column="no_produksi">
-                                        <option value="">All Colors</option>
-                                    </select>
+                                    <select class="color-filter dt-col-filter" data-column="no_produksi"><option value="">All Colors</option></select>
                                 </th>
                                 <th>
                                     <input type="text" class="column-filter" placeholder="Cari Sign">
-                                    <select class="color-filter form-select form-select-sm dt-col-filter" data-column="sign">
-                                        <option value="">All Colors</option>
-                                    </select>
+                                    <select class="color-filter dt-col-filter" data-column="sign"><option value="">All Colors</option></select>
                                 </th>
                                 <th>
                                     <input type="text" class="column-filter" placeholder="Cari Permasalahan">
-                                    <select class="color-filter form-select form-select-sm dt-col-filter" data-column="permasalahan">
-                                        <option value="">All Colors</option>
-                                    </select>
+                                    <select class="color-filter dt-col-filter" data-column="permasalahan"><option value="">All Colors</option></select>
                                 </th>
                                 <th>
                                     <input type="text" class="column-filter" placeholder="Cari Keterangan">
-                                    <select class="color-filter form-select form-select-sm dt-col-filter" data-column="keterangan">
-                                        <option value="">All Colors</option>
-                                    </select>
+                                    <select class="color-filter dt-col-filter" data-column="keterangan"><option value="">All Colors</option></select>
                                 </th>
                                 <th>
                                     <input type="text" class="column-filter" placeholder="Cari Penanganan">
-                                    <select class="color-filter form-select form-select-sm dt-col-filter" data-column="jenis_penanganan">
-                                        <option value="">All Colors</option>
-                                    </select>
+                                    <select class="color-filter dt-col-filter" data-column="jenis_penanganan"><option value="">All Colors</option></select>
                                 </th>
                                 <th>
                                     <input type="text" class="column-filter" placeholder="Cari PIC Repair">
-                                    <select class="color-filter form-select form-select-sm dt-col-filter" data-column="pic_repair">
-                                        <option value="">All Colors</option>
-                                    </select>
+                                    <select class="color-filter dt-col-filter" data-column="pic_repair"><option value="">All Colors</option></select>
                                 </th>
                                 <th>
                                     <input type="text" class="column-filter" placeholder="Cari Kategori">
-                                    <select class="color-filter form-select form-select-sm dt-col-filter" data-column="kategori">
-                                        <option value="">All Colors</option>
-                                    </select>
+                                    <select class="color-filter dt-col-filter" data-column="kategori"><option value="">All Colors</option></select>
                                 </th>
                                 <th>
                                     <input type="text" class="column-filter" placeholder="Cari Team">
-                                    <select class="color-filter form-select form-select-sm dt-col-filter" data-column="team">
-                                        <option value="">All Colors</option>
-                                    </select>
+                                    <select class="color-filter dt-col-filter" data-column="team"><option value="">All Colors</option></select>
                                 </th>
                                 <th>
                                     <input type="text" class="column-filter" placeholder="Cari PIC">
-                                    <select class="color-filter form-select form-select-sm dt-col-filter" data-column="pic">
-                                        <option value="">All Colors</option>
-                                    </select>
+                                    <select class="color-filter dt-col-filter" data-column="pic"><option value="">All Colors</option></select>
                                 </th>
                                 <th></th>
                             </tr>
@@ -315,7 +288,7 @@ $(function() {
     let clickTimer = null;
 
     const dataColumns = [
-        'no', 'instruksi', 'tipe_traktor', 'no_produksi',
+        'tanggal', 'no', 'no_instruksi', 'tipe_traktor', 'no_produksi',
         'sign', 'permasalahan', 'keterangan', 'jenis_penanganan',
         'pic_repair', 'kategori', 'team', 'pic'
     ];
@@ -346,8 +319,9 @@ $(function() {
         },
         columns: [
             { data: 'checkbox', name: 'checkbox', orderable: false, searchable: false },
+            { data: 'tanggal_display', name: 'tanggal', orderable: true, searchable: true },
             { data: 'no', name: 'no' },
-            { data: 'instruksi', name: 'instruksi' },
+            { data: 'no_instruksi', name: 'no_instruksi' },
             { data: 'tipe_traktor', name: 'tipe_traktor' },
             { data: 'no_produksi', name: 'no_produksi' },
             { data: 'sign', name: 'sign' },
@@ -360,7 +334,7 @@ $(function() {
             { data: 'pic', name: 'pic' },
             { data: 'action', name: 'action', orderable: false, searchable: false }
         ],
-        order: [[1, 'asc']],
+        order: [[2, 'asc']],
         pageLength: 25,
         drawCallback: function() {
             $('.row-checkbox').each(function() {
@@ -371,7 +345,6 @@ $(function() {
             var checked = $('.row-checkbox:checked').length;
             $('#selectAll').prop('checked', total > 0 && checked === total);
             updateBatchToolbar();
-            bindCellEvents();
         }
     });
 
@@ -387,10 +360,11 @@ $(function() {
     $('#selectAll').on('change', function() {
         var isChecked = $(this).prop('checked');
         if (isChecked) {
-            table.rows().every(function() {
+            selectedIds.clear();
+            table.rows({ search: 'applied' }).every(function() {
                 var rowData = this.data();
                 if (rowData && rowData.id) {
-                    selectedIds.add(rowData.id);
+                    selectedIds.add(parseInt(rowData.id));
                 }
             });
         } else {
@@ -407,20 +381,16 @@ $(function() {
         } else {
             selectedIds.delete(id);
         }
-        var totalRows = table.rows().count();
-        var checkedCount = $('.row-checkbox:checked').length;
-        $('#selectAll').prop('checked', checkedCount === totalRows && totalRows > 0);
+        var total = table.rows({ filter: 'applied' }).count();
+        var checked = $('.row-checkbox:checked').length;
+        $('#selectAll').prop('checked', total > 0 && checked === total);
         updateBatchToolbar();
     });
 
     function updateBatchToolbar() {
         var count = selectedIds.size;
         $('#selectedCount').text(count + ' selected');
-        if (count > 0) {
-            $('#batchToolbar').addClass('show');
-        } else {
-            $('#batchToolbar').removeClass('show');
-        }
+        $('#batchToolbar').toggleClass('show', count > 0);
     }
 
     $('#applyBatchColor').on('click', function() {
@@ -453,47 +423,66 @@ $(function() {
         });
     });
 
-    function bindCellEvents() {
-        $('.cell-content').off('click dblclick').on('click', function(e) {
-            var $this = $(this);
-            if ($this.hasClass('editing')) return;
-
-            if (clickTimer) {
-                clearTimeout(clickTimer);
-                clickTimer = null;
-                return;
-            }
-
-            clickTimer = setTimeout(function() {
-                clickTimer = null;
-                showColorPicker($this, e);
-            }, 200);
-        }).on('dblclick', function(e) {
-            if (clickTimer) {
-                clearTimeout(clickTimer);
-                clickTimer = null;
-            }
-            var $this = $(this);
-            if ($this.hasClass('editing')) return;
-            enableInlineEdit($this);
-        });
+    function getCellData(td) {
+        var $td = $(td);
+        var $span = $td.find('.cell-content');
+        if (!$span.length) return null;
+        return {
+            id: $span.data('id'),
+            column: $span.data('column'),
+            color: $span.data('color') || '#000000',
+            text: $span.text().trim(),
+            $span: $span
+        };
     }
 
-    function showColorPicker($cell, event) {
-        var $popup = $('#colorPopup');
-        activeCell = $cell;
+    $('#table1 tbody').on('click', 'td:not(:first-child):not(:last-child)', function(e) {
+        if ($(this).find('.cell-content').length === 0) return;
 
-        var offset = $cell.offset();
+        if (clickTimer) {
+            clearTimeout(clickTimer);
+            clickTimer = null;
+            return;
+        }
+
+        var cellData = getCellData(this);
+        if (!cellData) return;
+
+        clickTimer = setTimeout(function() {
+            clickTimer = null;
+            showColorPicker(cellData, e);
+        }, 200);
+    });
+
+    $('#table1 tbody').on('dblclick', 'td:not(:first-child):not(:last-child)', function(e) {
+        if (clickTimer) {
+            clearTimeout(clickTimer);
+            clickTimer = null;
+        }
+        if ($(this).find('.cell-content').length === 0) return;
+
+        var cellData = getCellData(this);
+        if (!cellData) return;
+
+        enableInlineEdit(cellData);
+    });
+
+    function showColorPicker(cellData, event) {
+        var $popup = $('#colorPopup');
+        activeCell = cellData;
+
+        var $td = $(event.currentTarget);
+        var offset = $td.offset();
         var popupWidth = 260;
-        var left = offset.left - popupWidth / 2 + $cell.outerWidth() / 2;
-        var top = offset.top + $cell.outerHeight() + 8;
+        var left = offset.left - popupWidth / 2 + $td.outerWidth() / 2;
+        var top = offset.top + $td.outerHeight() + 8;
 
         if (left < 10) left = 10;
         if (left + popupWidth > $(window).width() - 10) {
             left = $(window).width() - popupWidth - 10;
         }
 
-        var currentColor = $cell.data('color') || '#000000';
+        var currentColor = cellData.color;
         $('#customColorPicker').val(currentColor);
         $('.color-btn').removeClass('active');
         $('.color-btn[data-color="' + currentColor + '"]').addClass('active');
@@ -515,11 +504,11 @@ $(function() {
 
     function applyColorToActiveCell(color) {
         if (!activeCell) return;
-        var id = activeCell.data('id');
-        var column = activeCell.data('column');
+        var id = activeCell.id;
+        var column = activeCell.column;
 
-        activeCell.css('color', color);
-        activeCell.data('color', color);
+        activeCell.$span.css('color', color);
+        activeCell.$span.data('color', color);
 
         $.ajax({
             url: '{{ route('data.cell.color') }}',
@@ -539,26 +528,25 @@ $(function() {
     }
 
     $(document).on('click', function(e) {
-        if (!$(e.target).closest('#colorPopup').length && !$(e.target).closest('.cell-content').length) {
+        if (!$(e.target).closest('#colorPopup').length && !$(e.target).closest('td').length) {
             $('#colorPopup').removeClass('show');
         }
     });
 
-    function enableInlineEdit($cell) {
-        var currentText = $cell.text().trim();
-        var currentColor = $cell.data('color') || '#000000';
-        var id = $cell.data('id');
-        var column = $cell.data('column');
+    function enableInlineEdit(cellData) {
+        var $td = cellData.$span.closest('td');
+        var currentText = cellData.text;
+        var currentColor = cellData.color;
+        var id = cellData.id;
+        var column = cellData.column;
 
-        $cell.addClass('editing');
-        $cell.html('<input type="text" class="edit-input" value="' + $('<span>').text(currentText).html() + '" style="color:' + currentColor + '">');
-        var $input = $cell.find('.edit-input');
+        $td.find('.cell-wrap').addClass('editing');
+        $td.find('.cell-content').html('<input type="text" class="edit-input" value="' + $('<span>').text(currentText).html() + '" style="color:' + currentColor + '">');
+        var $input = $td.find('.edit-input');
         $input.focus().select();
 
-        var saveTimer;
-
         $input.on('blur', function() {
-            saveValue($cell, id, column, $input.val());
+            saveValue($td, id, column, $input.val());
         });
 
         $input.on('keydown', function(e) {
@@ -566,16 +554,14 @@ $(function() {
                 e.preventDefault();
                 $input.trigger('blur');
             } else if (e.key === 'Escape') {
-                $cell.removeClass('editing');
-                $cell.text(currentText);
-                bindCellEvents();
+                $td.find('.cell-wrap').removeClass('editing');
+                $td.find('.cell-content').text(currentText);
             }
         });
     }
 
-    function saveValue($cell, id, column, newValue) {
-        $cell.removeClass('editing');
-        var color = $cell.data('color') || '#000000';
+    function saveValue($td, id, column, newValue) {
+        $td.find('.cell-wrap').removeClass('editing');
 
         $.ajax({
             url: '{{ route('data.cell.value') }}',
@@ -587,22 +573,17 @@ $(function() {
                 value: newValue
             },
             success: function() {
-                $cell.text(newValue);
-                $cell.css('color', color);
-                bindCellEvents();
+                $td.find('.cell-content').text(newValue);
             },
             error: function() {
                 Swal.fire('Error', 'Gagal update nilai', 'error');
-                $cell.text(newValue);
-                $cell.css('color', color);
-                bindCellEvents();
+                $td.find('.cell-content').text(newValue);
             }
         });
     }
 
     $(document).on('click', '.delete-row', function() {
         var id = $(this).data('id');
-        var $btn = $(this);
 
         Swal.fire({
             title: 'Hapus data ini?',
@@ -624,6 +605,7 @@ $(function() {
                     },
                     success: function() {
                         Swal.fire('Terhapus!', 'Data berhasil dihapus.', 'success');
+                        selectedIds.delete(parseInt(id));
                         table.ajax.reload(null, false);
                     },
                     error: function() {
