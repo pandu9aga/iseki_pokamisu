@@ -26,7 +26,7 @@
                 <div class="sidebar-header">
                     <div class="d-flex justify-content-between">
                         <div class="logo">
-                            <a href="{{ route('data.index') }}"><img src="{{ asset('assets/images/logo/logo.png') }}" alt="Logo"></a>
+                            <a href="{{ route('data.index') }}">Pokamisu</a>
                         </div>
                         <div class="toggler">
                             <a href="#" class="sidebar-hide d-xl-none d-block"><i class="bi bi-x bi-middle"></i></a>
@@ -124,7 +124,11 @@
                         <p>Iseki Pokamisu</p>
                     </div>
                     <div class="float-end">
-                        <p>Powered by <a href="#">Laravel + Mazer</a></p>
+                        <p>Iseki - 
+                            <script>
+                                document.write(new Date().getFullYear());
+                            </script>
+                        </p>
                     </div>
                 </div>
             </footer>

@@ -5,6 +5,7 @@
 @push('styles')
 <link rel="stylesheet" href="{{ asset('assets/vendors/choices.js/choices.min.css') }}">
 <style>
+    #table1 { width: 100%; }
     #table1 thead tr.filters th { vertical-align: top; padding: 6px 4px; }
     #table1 thead tr.filters th input,
     #table1 thead tr.filters th .choices { width: 100% !important; margin-bottom: 2px; }
@@ -14,13 +15,19 @@
     }
     #table1 thead tr.filters th .choices__inner .choices__input { font-size: 11px; }
     #table1 thead tr.filters th select { width: 100%; font-size: 11px; padding: 2px 3px; margin-top: 1px; border: 1px solid #ddd; border-radius: 3px; }
-    #table1 td { position: relative; min-height: 28px; }
-    #table1 .cell-wrap { display: block; min-height: 24px; width: 100%; cursor: pointer; }
+    #table1 td { position: relative; min-height: 28px; word-break: break-word; white-space: normal; }
+    #table1 td .cell-wrap { display: block; min-height: 24px; width: 100%; cursor: pointer; }
     #table1 .cell-wrap .cell-content { border-bottom: 1px dashed transparent; transition: border-color 0.2s; }
     #table1 .cell-wrap:hover .cell-content { border-bottom-color: #aaa; }
     #table1 .cell-wrap.editing .cell-content { border-bottom-color: transparent; }
-    #table1 .cell-wrap .edit-input { width: 100%; border: 1px solid #435ebe; border-radius: 3px; padding: 2px 5px; font-size: inherit; background: #fff; min-width: 60px; }
-    #table1 .cell-wrap .edit-select { width: 100%; border: 1px solid #435ebe; border-radius: 3px; padding: 2px; font-size: inherit; background: #fff; min-width: 60px; }
+    #table1 .cell-wrap .edit-input { width: 100%; border: 1px solid #435ebe; border-radius: 3px; padding: 2px 5px; font-size: inherit; background: #fff; min-width: 60px; box-sizing: border-box; }
+    #table1 .edit-select-wrap { position: relative; }
+    #table1 .edit-select-wrap .edit-input { width: 100%; box-sizing: border-box; }
+    #table1 .edit-options { list-style: none; margin: 2px 0 0 0; padding: 0; max-height: 180px; overflow-y: auto; border: 1px solid #435ebe; border-radius: 3px; background: #fff; }
+    #table1 .edit-options .edit-option { padding: 3px 6px; cursor: pointer; font-size: 12px; }
+    #table1 .edit-options .edit-option:hover,
+    #table1 .edit-options .edit-option.highlight { background: #eef1ff; }
+    #table1 .edit-options .edit-option.selected { background: #d0d9f0; font-weight: bold; }
     .batch-toolbar { display: none; background: #f0f4ff; border: 1px solid #d0d9f0; border-radius: 6px; padding: 12px 16px; margin-bottom: 16px; align-items: center; gap: 12px; }
     .batch-toolbar.show { display: flex; }
     .color-popup { display: none; position: fixed; z-index: 9999; background: #fff; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); padding: 12px; min-width: 240px; }
@@ -84,7 +91,7 @@
                         <button id="applyBatchColor" class="btn btn-primary btn-sm">Apply</button>
                     </div>
                 </div>
-                <div class="table-responsive">
+                <div>
                     <table class="table table-striped" id="table1">
                         <thead>
                             <tr>
@@ -92,12 +99,12 @@
                                 <th>Tanggal</th><th>No</th><th>No Instruksi</th><th>Tipe Traktor</th>
                                 <th>No Produksi</th><th>Sign</th><th>Permasalahan</th><th>Keterangan</th>
                                 <th>Jenis Penanganan</th><th>PIC Repair</th>
-                                <th style="min-width:100px">Kategori</th><th style="min-width:90px">Team</th>
-                                <th style="min-width:120px">PIC</th><th style="width:60px">Aksi</th>
+                                <th>Kategori</th><th>Team</th>
+                                <th>PIC</th><th style="width:60px">Aksi</th>
                             </tr>
                             <tr class="filters">
                                 <th></th>
-                                <th><input type="text" class="column-filter" placeholder="Cari Tgl"><select class="color-filter dt-col-filter" data-column="tanggal"><option value="">All Colors</option></select></th>
+                                <th><input type="date" class="column-filter" placeholder="Cari Tgl"><select class="color-filter dt-col-filter" data-column="tanggal"><option value="">All Colors</option></select></th>
                                 <th><input type="text" class="column-filter" placeholder="Cari No"><select class="color-filter dt-col-filter" data-column="no"><option value="">All Colors</option></select></th>
                                 <th><input type="text" class="column-filter" placeholder="Cari Instruksi"><select class="color-filter dt-col-filter" data-column="no_instruksi"><option value="">All Colors</option></select></th>
                                 <th><input type="text" class="column-filter" placeholder="Cari Tipe"><select class="color-filter dt-col-filter" data-column="tipe_traktor"><option value="">All Colors</option></select></th>
@@ -108,18 +115,18 @@
                                 <th><input type="text" class="column-filter" placeholder="Cari Penanganan"><select class="color-filter dt-col-filter" data-column="jenis_penanganan"><option value="">All Colors</option></select></th>
                                 <th><input type="text" class="column-filter" placeholder="Cari PIC Repair"><select class="color-filter dt-col-filter" data-column="pic_repair"><option value="">All Colors</option></select></th>
                                 <th>
-                                    <select class="column-filter-select" data-column="kategori" data-placeholder="Cari Kategori"><option value="">All</option>
-                                    @foreach($kategoriList as $k)<option value="{{ $k }}">{{ $k }}</option>@endforeach</select>
+                                    <input type="text" class="column-filter" data-column="kategori" placeholder="Cari Kategori" list="dl-kategori">
+                                    <datalist id="dl-kategori">@foreach($kategoriList as $k)<option value="{{ $k }}">@endforeach</datalist>
                                     <select class="color-filter dt-col-filter" data-column="kategori"><option value="">All Colors</option></select>
                                 </th>
                                 <th>
-                                    <select class="column-filter-select" data-column="team" data-placeholder="Cari Team"><option value="">All</option>
-                                    @foreach($teamList as $t)<option value="{{ $t }}">{{ $t }}</option>@endforeach</select>
+                                    <input type="text" class="column-filter" data-column="team" placeholder="Cari Team" list="dl-team">
+                                    <datalist id="dl-team">@foreach($teamList as $t)<option value="{{ $t }}">@endforeach</datalist>
                                     <select class="color-filter dt-col-filter" data-column="team"><option value="">All Colors</option></select>
                                 </th>
                                 <th>
-                                    <select class="column-filter-select" data-column="pic" data-placeholder="Cari PIC"><option value="">All</option>
-                                    @foreach($picList as $p)<option value="{{ $p }}">{{ $p }}</option>@endforeach</select>
+                                    <input type="text" class="column-filter" data-column="pic" placeholder="Cari PIC" list="dl-pic">
+                                    <datalist id="dl-pic">@foreach($picList as $p)<option value="{{ $p }}">@endforeach</datalist>
                                     <select class="color-filter dt-col-filter" data-column="pic"><option value="">All Colors</option></select>
                                 </th>
                                 <th></th>
@@ -154,12 +161,10 @@
 @endsection
 
 @push('scripts')
-<script src="{{ asset('assets/vendors/choices.js/choices.min.js') }}"></script>
 <script>
 $(function() {
     let selectedIds = new Set();
-    let table, activeCell = null, clickTimer = null;
-    let choiceInstances = {};
+    let table, activeCell = null;
 
     const dataColumns = [
         'tanggal', 'no', 'no_instruksi', 'tipe_traktor', 'no_produksi',
@@ -174,17 +179,8 @@ $(function() {
         });
     });
 
-    $('.column-filter-select').each(function() {
-        var $this = $(this);
-        var ch = new Choices(this, {
-            searchEnabled: true, searchPlaceholderValue: $this.data('placeholder') || 'Cari...',
-            itemSelectText: '', placeholder: true, allowHTML: false
-        });
-        choiceInstances[$this.data('column')] = ch;
-    });
-
     table = $('#table1').DataTable({
-        processing: true, serverSide: true,
+        processing: true, serverSide: true, autoWidth: false,
         ajax: {
             url: '{{ route('data.table') }}',
             data: function(d) {
@@ -192,11 +188,6 @@ $(function() {
                 $('.color-filter').each(function() {
                     var val = $(this).val();
                     if (val) d.colorFilters[$(this).data('column')] = val;
-                });
-                d.selectFilters = {};
-                $('.column-filter-select').each(function() {
-                    var val = $(this).val();
-                    if (val) d.selectFilters[$(this).data('column')] = val;
                 });
             }
         },
@@ -211,7 +202,7 @@ $(function() {
             { data: 'kategori', name: 'kategori' }, { data: 'team', name: 'team' }, { data: 'pic', name: 'pic' },
             { data: 'action', name: 'action', orderable: false, searchable: false }
         ],
-        order: [[2, 'asc']], pageLength: 25,
+        order: [[2, 'asc']], pageLength: 100,
         drawCallback: function() {
             $('.row-checkbox').each(function() {
                 $(this).prop('checked', selectedIds.has(parseInt($(this).val())));
@@ -223,11 +214,9 @@ $(function() {
         }
     });
 
-    $('.column-filter').on('keyup change', function() {
-        table.column($(this).closest('th').index()).search($(this).val()).draw();
-    });
+    $('#table1 thead tr.filters').on('click', function(e) { e.stopPropagation(); });
 
-    $('.column-filter-select').on('change', function() {
+    $('.column-filter').on('keyup change', function() {
         table.column($(this).closest('th').index()).search($(this).val()).draw();
     });
 
@@ -287,16 +276,15 @@ $(function() {
         };
     }
 
-    $('#table1 tbody').on('click', 'td:not(:first-child):not(:last-child)', function(e) {
+    $('#table1 tbody').on('contextmenu', 'td:not(:first-child):not(:last-child)', function(e) {
+        e.preventDefault();
         if (!$(this).find('.cell-content').length) return;
-        if (clickTimer) { clearTimeout(clickTimer); clickTimer = null; return; }
         var cellData = getCellData(this);
         if (!cellData) return;
-        clickTimer = setTimeout(function() { clickTimer = null; showColorPicker(cellData, e); }, 200);
+        showColorPicker(cellData, e);
     });
 
     $('#table1 tbody').on('dblclick', 'td:not(:first-child):not(:last-child)', function(e) {
-        if (clickTimer) { clearTimeout(clickTimer); clickTimer = null; }
         if (!$(this).find('.cell-content').length) return;
         var cellData = getCellData(this);
         if (!cellData) return;
@@ -308,9 +296,22 @@ $(function() {
         var $popup = $('#colorPopup');
         activeCell = cellData;
         var $td = $(event.currentTarget);
-        var off = $td.offset(), pw = 260;
-        var l = off.left - pw/2 + $td.outerWidth()/2, t = off.top + $td.outerHeight() + 8;
+        var off = $td.offset(), pw = 260, ph = 180;
+        var l = off.left - pw/2 + $td.outerWidth()/2;
         if (l < 10) l = 10; if (l + pw > $(window).width()-10) l = $(window).width()-pw-10;
+        var scrollTop = $(window).scrollTop();
+        var viewH = $(window).height();
+        var tdBottom = off.top + $td.outerHeight();
+        var spaceBelow = (scrollTop + viewH) - tdBottom;
+        var spaceAbove = off.top - scrollTop;
+        var t;
+        if (spaceBelow >= ph + 10) {
+            t = tdBottom + 8;
+        } else if (spaceAbove >= ph + 10) {
+            t = off.top - ph - 8;
+        } else {
+            t = scrollTop + 10;
+        }
         $('#customColorPicker').val(cellData.color);
         $('.color-btn').removeClass('active');
         $('.color-btn[data-color="' + cellData.color + '"]').addClass('active');
@@ -350,17 +351,59 @@ $(function() {
     function enableSelectEdit(cellData) {
         var $td = cellData.$span.closest('td');
         $td.find('.cell-wrap').addClass('editing');
-        var opts = cellData.options.map(function(o) {
-            var sel = o === cellData.text ? 'selected' : '';
-            return '<option value="' + o + '" ' + sel + '>' + o + '</option>';
+        var currentVal = $('<span>').text(cellData.text).html();
+        var optsHtml = cellData.options.map(function(o) {
+            var display = o === '' ? '(kosong)' : $('<span>').text(o).html();
+            var sel = o === cellData.text ? ' class="selected"' : '';
+            var val = $('<span>').text(o).html();
+            return '<li class="edit-option"' + sel + ' data-value="' + val + '">' + display + '</li>';
         }).join('');
-        $td.find('.cell-content').html('<select class="edit-select">' + opts + '</select>');
-        var $sel = $td.find('.edit-select').focus();
-        $sel.on('change', function() { saveValue($td, cellData.id, cellData.column, $(this).val()); });
-        $sel.on('blur', function() { saveValue($td, cellData.id, cellData.column, $(this).val()); });
-        $sel.on('keydown', function(e) {
-            if (e.key === 'Escape') { $td.find('.cell-wrap').removeClass('editing'); $td.find('.cell-content').text(cellData.text); }
+        $td.find('.cell-content').html(
+            '<div class="edit-select-wrap">' +
+                '<input type="text" class="edit-input" placeholder="Cari..." value="' + currentVal + '" style="color:' + cellData.color + '">' +
+                '<ul class="edit-options">' + optsHtml + '</ul>' +
+            '</div>'
+        );
+        var $input = $td.find('.edit-input');
+        var $options = $td.find('.edit-option');
+        $input.on('input', function() {
+            var q = $(this).val().toLowerCase();
+            $options.each(function() {
+                $(this).toggle($(this).text().toLowerCase().indexOf(q) >= 0);
+            });
         });
+        $options.on('click', function() {
+            saveValue($td, cellData.id, cellData.column, $(this).data('value'));
+        });
+        $input.on('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                var $highlighted = $options.filter('.highlight').first();
+                if ($highlighted.length) {
+                    saveValue($td, cellData.id, cellData.column, $highlighted.data('value'));
+                } else {
+                    saveValue($td, cellData.id, cellData.column, $input.val());
+                }
+            } else if (e.key === 'Escape') {
+                $td.find('.cell-wrap').removeClass('editing');
+                $td.find('.cell-content').text(cellData.text);
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                var $vis = $options.filter(':visible');
+                var idx = $vis.index($options.filter('.highlight'));
+                $options.removeClass('highlight');
+                if (idx < $vis.length - 1) $vis.eq(idx + 1).addClass('highlight');
+                else $vis.first().addClass('highlight');
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                var $vis = $options.filter(':visible');
+                var idx = $vis.index($options.filter('.highlight'));
+                $options.removeClass('highlight');
+                if (idx > 0) $vis.eq(idx - 1).addClass('highlight');
+                else $vis.last().addClass('highlight');
+            }
+        });
+        $input.focus().select();
     }
 
     function saveValue($td, id, column, newValue) {

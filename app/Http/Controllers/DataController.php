@@ -30,7 +30,7 @@ class DataController extends Controller
                 ->table('employees')
                 ->whereNotNull('nama')
                 ->where('nama', '!=', '')
-                ->orderBy('nama')
+                ->orderBy('nik')
                 ->pluck('nama')
                 ->toArray();
         } catch (\Exception $e) {
@@ -184,15 +184,15 @@ class DataController extends Controller
                 return '<div class="cell-wrap"><span class="cell-content" data-id="' . $row->id . '" data-column="pic_repair" data-color="' . $row->pic_repair_color . '" style="color:' . $row->pic_repair_color . '">' . e($row->pic_repair) . '</span></div>';
             })
             ->editColumn('kategori', function ($row) {
-                $opts = implode(',', $this->kategoriList);
+                $opts = ',' . implode(',', $this->kategoriList);
                 return '<div class="cell-wrap"><span class="cell-content is-select" data-select="kategori" data-options="' . $opts . '" data-id="' . $row->id . '" data-column="kategori" data-color="' . $row->kategori_color . '" style="color:' . $row->kategori_color . '">' . e($row->kategori) . '</span></div>';
             })
             ->editColumn('team', function ($row) {
-                $opts = implode(',', $this->teamList);
+                $opts = ',' . implode(',', $this->teamList);
                 return '<div class="cell-wrap"><span class="cell-content is-select" data-select="team" data-options="' . $opts . '" data-id="' . $row->id . '" data-column="team" data-color="' . $row->team_color . '" style="color:' . $row->team_color . '">' . e($row->team) . '</span></div>';
             })
             ->editColumn('pic', function ($row) {
-                $opts = implode(',', $this->getPICList());
+                $opts = ',' . implode(',', $this->getPICList());
                 return '<div class="cell-wrap"><span class="cell-content is-select" data-select="pic" data-options="' . $opts . '" data-id="' . $row->id . '" data-column="pic" data-color="' . $row->pic_color . '" style="color:' . $row->pic_color . '">' . e($row->pic) . '</span></div>';
             })
             ->filterColumn('no', function ($query, $keyword) {
