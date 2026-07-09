@@ -7,14 +7,22 @@
 <style>
     #table1 { width: 100%; }
     #table1 thead tr.filters th { vertical-align: top; padding: 6px 4px; }
-    #table1 thead tr.filters th input,
-    #table1 thead tr.filters th .choices { width: 100% !important; margin-bottom: 2px; }
-    #table1 thead tr.filters th .choices__inner {
-        min-height: 22px; font-size: 11px; padding: 1px 4px;
-        background: #fff; border-radius: 3px;
-    }
-    #table1 thead tr.filters th .choices__inner .choices__input { font-size: 11px; }
+    #table1 thead tr.filters th input { width: 100% !important; margin-bottom: 2px; box-sizing: border-box; }
     #table1 thead tr.filters th select { width: 100%; font-size: 11px; padding: 2px 3px; margin-top: 1px; border: 1px solid #ddd; border-radius: 3px; }
+    #table1 thead tr.filters th .color-wrap { position: relative; width: 100%; margin-top: 2px; height: 22px; }
+    #table1 thead tr.filters th .color-wrap select.cf-select { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+    #table1 thead tr.filters th .color-wrap .cf-trigger { display: flex; align-items: center; gap: 3px; border: 1px solid #ddd; border-radius: 3px; padding: 2px 4px; background: #fff; min-height: 20px; font-size: 11px; cursor: pointer; box-sizing: border-box; height: 22px; }
+    #table1 thead tr.filters th .color-wrap .cf-trigger .dot { width: 14px; height: 14px; border-radius: 2px; flex-shrink: 0; }
+    #table1 thead tr.filters th .color-wrap .cf-trigger .arrow { margin-left: auto; font-size: 8px; color: #999; }
+    #table1 thead tr.filters th .color-wrap .cf-dropdown { display: none; position: absolute; top: 100%; left: 0; min-width: 100%; background: #fff; border: 1px solid #ccc; border-radius: 3px; z-index: 9999; max-height: 160px; overflow-y: auto; }
+    #table1 thead tr.filters th .color-wrap.open .cf-dropdown { display: block; }
+    #table1 thead tr.filters th .color-wrap .cf-option { display: flex; align-items: center; gap: 4px; padding: 3px 6px; cursor: pointer; font-size: 11px; }
+    #table1 thead tr.filters th .color-wrap .cf-option:hover { background: #eef1ff; }
+    #table1 thead tr.filters th .color-wrap .cf-option .dot { width: 14px; height: 14px; border-radius: 2px; flex-shrink: 0; }
+    #table1 thead tr.filters th .btn-date-trigger { flex-shrink: 0; padding: 1px 6px; border: 1px solid #ddd; border-radius: 3px; background: #fff; cursor: pointer; line-height: 1; display: flex; align-items: center; }
+    #table1 thead tr.filters th     .btn-date-trigger:hover { background: #eef1ff; }
+    .preset-batch { width: 22px; height: 22px; border-radius: 3px; border: 2px solid transparent; cursor: pointer; padding: 0; flex-shrink: 0; }
+    .preset-batch.selected { border-color: #435ebe; }
     #table1 td { position: relative; min-height: 28px; word-break: break-word; white-space: normal; }
     #table1 td .cell-wrap { display: block; min-height: 24px; width: 100%; cursor: pointer; }
     #table1 .cell-wrap .cell-content { border-bottom: 1px dashed transparent; transition: border-color 0.2s; }
@@ -37,7 +45,6 @@
     .color-popup .preset-colors .color-btn:hover, .color-popup .preset-colors .color-btn.active { border-color: #435ebe; }
     .color-popup .custom-color { display: flex; align-items: center; gap: 8px; }
     .color-popup .custom-color input[type="color"] { width: 40px; height: 32px; border: none; padding: 0; cursor: pointer; }
-    .dt-col-filter { margin-top: 2px; width: 100%; }
 </style>
 @endpush
 
@@ -70,9 +77,19 @@
             <div class="card-body">
                 <div class="batch-toolbar" id="batchToolbar">
                     <span id="selectedCount" class="fw-bold">0 selected</span>
-                    <div class="d-flex align-items-center gap-2">
-                        <label class="form-label mb-0">Change Color:</label>
-                        <input type="color" id="batchColorPicker" value="#ff0000">
+                    <div class="d-flex align-items-center flex-wrap gap-2">
+                        <span class="fw-bold me-1">Warna:</span>
+                        <button class="color-btn preset-batch" style="background:#C00000" data-color="#C00000"></button>
+                        <button class="color-btn preset-batch" style="background:#FF0000" data-color="#FF0000"></button>
+                        <button class="color-btn preset-batch" style="background:#FFC000" data-color="#FFC000"></button>
+                        <button class="color-btn preset-batch" style="background:#FFFF00" data-color="#FFFF00"></button>
+                        <button class="color-btn preset-batch" style="background:#00FF00" data-color="#00FF00"></button>
+                        <button class="color-btn preset-batch" style="background:#00B050" data-color="#00B050"></button>
+                        <button class="color-btn preset-batch" style="background:#00B0F0" data-color="#00B0F0"></button>
+                        <button class="color-btn preset-batch" style="background:#0000FF" data-color="#0000FF"></button>
+                        <button class="color-btn preset-batch" style="background:#002060" data-color="#002060"></button>
+                        <button class="color-btn preset-batch" style="background:#7030A0" data-color="#7030A0"></button>
+                        <input type="color" id="batchColorPicker" value="#ff0000" title="Custom color">
                         <select id="batchColumnSelect" class="form-select form-select-sm" multiple style="min-width:180px;max-height:150px">
                             <option value="tanggal">Tanggal</option>
                             <option value="no">No</option>
@@ -89,6 +106,7 @@
                             <option value="pic">PIC</option>
                         </select>
                         <button id="applyBatchColor" class="btn btn-primary btn-sm">Apply</button>
+                        <button id="unselectAll" class="btn btn-secondary btn-sm">Unselect</button>
                     </div>
                 </div>
                 <div>
@@ -104,30 +122,30 @@
                             </tr>
                             <tr class="filters">
                                 <th></th>
-                                <th><input type="date" class="column-filter" placeholder="Cari Tgl"><select class="color-filter dt-col-filter" data-column="tanggal"><option value="">All Colors</option></select></th>
-                                <th><input type="text" class="column-filter" placeholder="Cari No"><select class="color-filter dt-col-filter" data-column="no"><option value="">All Colors</option></select></th>
-                                <th><input type="text" class="column-filter" placeholder="Cari Instruksi"><select class="color-filter dt-col-filter" data-column="no_instruksi"><option value="">All Colors</option></select></th>
-                                <th><input type="text" class="column-filter" placeholder="Cari Tipe"><select class="color-filter dt-col-filter" data-column="tipe_traktor"><option value="">All Colors</option></select></th>
-                                <th><input type="text" class="column-filter" placeholder="Cari No Produksi"><select class="color-filter dt-col-filter" data-column="no_produksi"><option value="">All Colors</option></select></th>
-                                <th><input type="text" class="column-filter" placeholder="Cari Sign"><select class="color-filter dt-col-filter" data-column="sign"><option value="">All Colors</option></select></th>
-                                <th><input type="text" class="column-filter" placeholder="Cari Permasalahan"><select class="color-filter dt-col-filter" data-column="permasalahan"><option value="">All Colors</option></select></th>
-                                <th><input type="text" class="column-filter" placeholder="Cari Keterangan"><select class="color-filter dt-col-filter" data-column="keterangan"><option value="">All Colors</option></select></th>
-                                <th><input type="text" class="column-filter" placeholder="Cari Penanganan"><select class="color-filter dt-col-filter" data-column="jenis_penanganan"><option value="">All Colors</option></select></th>
-                                <th><input type="text" class="column-filter" placeholder="Cari PIC Repair"><select class="color-filter dt-col-filter" data-column="pic_repair"><option value="">All Colors</option></select></th>
+                                <th><div class="d-flex" style="gap:2px"><input type="date" class="column-filter" id="dateFilter" style="flex:1;min-width:0;min-height:24px"><button type="button" class="btn-date-trigger" title="Pilih Tanggal"><i class="bi bi-calendar3"></i></button></div><div class="color-wrap"><select class="cf-select" data-column="tanggal"><option value="">All</option></select><div class="cf-trigger"><span class="dot" style="background:#fff"></span><span class="arrow">&#9660;</span></div><div class="cf-dropdown"><div class="cf-option" data-color=""><span class="dot" style="background:#fff;border:1px solid #ccc"></span>All</div></div></div></th>
+                                <th><input type="text" class="column-filter" placeholder="Cari No"><div class="color-wrap"><select class="cf-select" data-column="no"><option value="">All</option></select><div class="cf-trigger"><span class="dot" style="background:#fff"></span><span class="arrow">&#9660;</span></div><div class="cf-dropdown"><div class="cf-option" data-color=""><span class="dot" style="background:#fff;border:1px solid #ccc"></span>All</div></div></div></th>
+                                <th><input type="text" class="column-filter" placeholder="Cari Instruksi"><div class="color-wrap"><select class="cf-select" data-column="no_instruksi"><option value="">All</option></select><div class="cf-trigger"><span class="dot" style="background:#fff"></span><span class="arrow">&#9660;</span></div><div class="cf-dropdown"><div class="cf-option" data-color=""><span class="dot" style="background:#fff;border:1px solid #ccc"></span>All</div></div></div></th>
+                                <th><input type="text" class="column-filter" placeholder="Cari Tipe"><div class="color-wrap"><select class="cf-select" data-column="tipe_traktor"><option value="">All</option></select><div class="cf-trigger"><span class="dot" style="background:#fff"></span><span class="arrow">&#9660;</span></div><div class="cf-dropdown"><div class="cf-option" data-color=""><span class="dot" style="background:#fff;border:1px solid #ccc"></span>All</div></div></div></th>
+                                <th><input type="text" class="column-filter" placeholder="Cari No Produksi"><div class="color-wrap"><select class="cf-select" data-column="no_produksi"><option value="">All</option></select><div class="cf-trigger"><span class="dot" style="background:#fff"></span><span class="arrow">&#9660;</span></div><div class="cf-dropdown"><div class="cf-option" data-color=""><span class="dot" style="background:#fff;border:1px solid #ccc"></span>All</div></div></div></th>
+                                <th><input type="text" class="column-filter" placeholder="Cari Sign"><div class="color-wrap"><select class="cf-select" data-column="sign"><option value="">All</option></select><div class="cf-trigger"><span class="dot" style="background:#fff"></span><span class="arrow">&#9660;</span></div><div class="cf-dropdown"><div class="cf-option" data-color=""><span class="dot" style="background:#fff;border:1px solid #ccc"></span>All</div></div></div></th>
+                                <th><input type="text" class="column-filter" placeholder="Cari Permasalahan"><div class="color-wrap"><select class="cf-select" data-column="permasalahan"><option value="">All</option></select><div class="cf-trigger"><span class="dot" style="background:#fff"></span><span class="arrow">&#9660;</span></div><div class="cf-dropdown"><div class="cf-option" data-color=""><span class="dot" style="background:#fff;border:1px solid #ccc"></span>All</div></div></div></th>
+                                <th><input type="text" class="column-filter" placeholder="Cari Keterangan"><div class="color-wrap"><select class="cf-select" data-column="keterangan"><option value="">All</option></select><div class="cf-trigger"><span class="dot" style="background:#fff"></span><span class="arrow">&#9660;</span></div><div class="cf-dropdown"><div class="cf-option" data-color=""><span class="dot" style="background:#fff;border:1px solid #ccc"></span>All</div></div></div></th>
+                                <th><input type="text" class="column-filter" placeholder="Cari Penanganan"><div class="color-wrap"><select class="cf-select" data-column="jenis_penanganan"><option value="">All</option></select><div class="cf-trigger"><span class="dot" style="background:#fff"></span><span class="arrow">&#9660;</span></div><div class="cf-dropdown"><div class="cf-option" data-color=""><span class="dot" style="background:#fff;border:1px solid #ccc"></span>All</div></div></div></th>
+                                <th><input type="text" class="column-filter" placeholder="Cari PIC Repair"><div class="color-wrap"><select class="cf-select" data-column="pic_repair"><option value="">All</option></select><div class="cf-trigger"><span class="dot" style="background:#fff"></span><span class="arrow">&#9660;</span></div><div class="cf-dropdown"><div class="cf-option" data-color=""><span class="dot" style="background:#fff;border:1px solid #ccc"></span>All</div></div></div></th>
                                 <th>
                                     <input type="text" class="column-filter" data-column="kategori" placeholder="Cari Kategori" list="dl-kategori">
                                     <datalist id="dl-kategori">@foreach($kategoriList as $k)<option value="{{ $k }}">@endforeach</datalist>
-                                    <select class="color-filter dt-col-filter" data-column="kategori"><option value="">All Colors</option></select>
+                                    <div class="color-wrap"><select class="cf-select" data-column="kategori"><option value="">All</option></select><div class="cf-trigger"><span class="dot" style="background:#fff"></span><span class="arrow">&#9660;</span></div><div class="cf-dropdown"><div class="cf-option" data-color=""><span class="dot" style="background:#fff;border:1px solid #ccc"></span>All</div></div></div>
                                 </th>
                                 <th>
                                     <input type="text" class="column-filter" data-column="team" placeholder="Cari Team" list="dl-team">
                                     <datalist id="dl-team">@foreach($teamList as $t)<option value="{{ $t }}">@endforeach</datalist>
-                                    <select class="color-filter dt-col-filter" data-column="team"><option value="">All Colors</option></select>
+                                    <div class="color-wrap"><select class="cf-select" data-column="team"><option value="">All</option></select><div class="cf-trigger"><span class="dot" style="background:#fff"></span><span class="arrow">&#9660;</span></div><div class="cf-dropdown"><div class="cf-option" data-color=""><span class="dot" style="background:#fff;border:1px solid #ccc"></span>All</div></div></div>
                                 </th>
                                 <th>
                                     <input type="text" class="column-filter" data-column="pic" placeholder="Cari PIC" list="dl-pic">
                                     <datalist id="dl-pic">@foreach($picList as $p)<option value="{{ $p }}">@endforeach</datalist>
-                                    <select class="color-filter dt-col-filter" data-column="pic"><option value="">All Colors</option></select>
+                                    <div class="color-wrap"><select class="cf-select" data-column="pic"><option value="">All</option></select><div class="cf-trigger"><span class="dot" style="background:#fff"></span><span class="arrow">&#9660;</span></div><div class="cf-dropdown"><div class="cf-option" data-color=""><span class="dot" style="background:#fff;border:1px solid #ccc"></span>All</div></div></div>
                                 </th>
                                 <th></th>
                             </tr>
@@ -143,18 +161,16 @@
 <div class="color-popup" id="colorPopup">
     <div class="fw-bold mb-2">Change Cell Color</div>
     <div class="preset-colors">
-        <button class="color-btn" style="background:#000000" data-color="#000000"></button>
-        <button class="color-btn" style="background:#ff0000" data-color="#ff0000"></button>
-        <button class="color-btn" style="background:#ff6600" data-color="#ff6600"></button>
-        <button class="color-btn" style="background:#ffcc00" data-color="#ffcc00"></button>
-        <button class="color-btn" style="background:#00cc00" data-color="#00cc00"></button>
-        <button class="color-btn" style="background:#0066ff" data-color="#0066ff"></button>
-        <button class="color-btn" style="background:#6600cc" data-color="#6600cc"></button>
-        <button class="color-btn" style="background:#cc0066" data-color="#cc0066"></button>
-        <button class="color-btn" style="background:#996633" data-color="#996633"></button>
-        <button class="color-btn" style="background:#666666" data-color="#666666"></button>
-        <button class="color-btn" style="background:#00cccc" data-color="#00cccc"></button>
-        <button class="color-btn" style="background:#ff66b2" data-color="#ff66b2"></button>
+        <button class="color-btn" style="background:#C00000" data-color="#C00000"></button>
+        <button class="color-btn" style="background:#FF0000" data-color="#FF0000"></button>
+        <button class="color-btn" style="background:#FFC000" data-color="#FFC000"></button>
+        <button class="color-btn" style="background:#FFFF00" data-color="#FFFF00"></button>
+        <button class="color-btn" style="background:#00FF00" data-color="#00FF00"></button>
+        <button class="color-btn" style="background:#00B050" data-color="#00B050"></button>
+        <button class="color-btn" style="background:#00B0F0" data-color="#00B0F0"></button>
+        <button class="color-btn" style="background:#0000FF" data-color="#0000FF"></button>
+        <button class="color-btn" style="background:#002060" data-color="#002060"></button>
+        <button class="color-btn" style="background:#7030A0" data-color="#7030A0"></button>
     </div>
     <div class="custom-color"><label class="form-label mb-0 me-1">Custom:</label><input type="color" id="customColorPicker" value="#000000"><button id="applyCustomColor" class="btn btn-sm btn-primary">Apply</button></div>
 </div>
@@ -174,9 +190,41 @@ $(function() {
 
     dataColumns.forEach(function(col) {
         $.get('{{ url('colors') }}/' + col, function(colors) {
-            var $sel = $('.color-filter[data-column="' + col + '"]');
-            colors.forEach(function(c) { $sel.append('<option value="' + c + '">' + c + '</option>'); });
+            var $wrap = $('.color-wrap').has('.cf-select[data-column="' + col + '"]');
+            var $sel = $wrap.find('.cf-select');
+            var $dd = $wrap.find('.cf-dropdown');
+            colors.forEach(function(c) {
+                $sel.append('<option value="' + c + '">' + c + '</option>');
+                $dd.append('<div class="cf-option" data-color="' + c + '"><span class="dot" style="background:' + c + '"></span>' + c + '</div>');
+            });
         });
+    });
+
+    $('#table1 thead tr.filters th').on('click', '.cf-trigger', function(e) {
+        e.stopPropagation();
+        var $wrap = $(this).closest('.color-wrap');
+        $('.color-wrap').not($wrap).removeClass('open');
+        $wrap.toggleClass('open');
+    });
+
+    $('#table1 thead tr.filters th').on('click', '.cf-option', function() {
+        var $wrap = $(this).closest('.color-wrap');
+        var color = $(this).data('color') || '';
+        $wrap.find('.cf-select').val(color).trigger('change');
+        $wrap.removeClass('open');
+    });
+
+    $(document).on('click', function(e) {
+        if (!$(e.target).closest('.color-wrap').length) {
+            $('.color-wrap').removeClass('open');
+        }
+    });
+
+    $(document).on('change', '.cf-select', function() {
+        var $wrap = $(this).closest('.color-wrap');
+        var val = $(this).val();
+        $wrap.find('.cf-trigger .dot').css('background', val || '#fff');
+        table.draw();
     });
 
     table = $('#table1').DataTable({
@@ -185,7 +233,7 @@ $(function() {
             url: '{{ route('data.table') }}',
             data: function(d) {
                 d.colorFilters = {};
-                $('.color-filter').each(function() {
+                $('.cf-select').each(function() {
                     var val = $(this).val();
                     if (val) d.colorFilters[$(this).data('column')] = val;
                 });
@@ -216,11 +264,15 @@ $(function() {
 
     $('#table1 thead tr.filters').on('click', function(e) { e.stopPropagation(); });
 
+    $(document).on('click', '.btn-date-trigger', function() {
+        var inp = $(this).closest('th').find('input[type="date"]')[0];
+        if (inp && inp.showPicker) inp.showPicker();
+        else if (inp) inp.focus();
+    });
+
     $('.column-filter').on('keyup change', function() {
         table.column($(this).closest('th').index()).search($(this).val()).draw();
     });
-
-    $('.color-filter').on('change', function() { table.draw(); });
 
     $('#selectAll').on('change', function() {
         var isChecked = $(this).prop('checked');
@@ -232,6 +284,13 @@ $(function() {
             });
         }
         $('.row-checkbox').prop('checked', isChecked);
+        updateBatchToolbar();
+    });
+
+    $('#unselectAll').on('click', function() {
+        selectedIds.clear();
+        $('#selectAll').prop('checked', false);
+        $('.row-checkbox').prop('checked', false);
         updateBatchToolbar();
     });
 
@@ -249,6 +308,12 @@ $(function() {
         $('#selectedCount').text(c + ' selected');
         $('#batchToolbar').toggleClass('show', c > 0);
     }
+
+    $(document).on('click', '.preset-batch', function() {
+        $('.preset-batch').removeClass('selected');
+        $(this).addClass('selected');
+        $('#batchColorPicker').val($(this).data('color'));
+    });
 
     $('#applyBatchColor').on('click', function() {
         var ids = Array.from(selectedIds);
