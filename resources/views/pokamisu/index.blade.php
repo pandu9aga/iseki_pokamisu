@@ -23,6 +23,12 @@
     #table1 thead tr.filters th     .btn-date-trigger:hover { background: #eef1ff; }
     .preset-batch { width: 22px; height: 22px; border-radius: 3px; border: 2px solid transparent; cursor: pointer; padding: 0; flex-shrink: 0; }
     .preset-batch.selected { border-color: #435ebe; }
+    .dataTables_wrapper .dataTables_paginate .paginate_button { padding: 0.2rem 0.5rem; margin: 0; }
+    div.dt-paging .pagination { margin: 0 !important; flex-wrap: nowrap !important; gap: 0 !important; }
+    div.dt-paging .page-item { margin: 0 !important; padding: 0 !important; list-style: none; }
+    div.dt-paging .page-item:first-child { margin-right: 0 !important; }
+    div.dt-paging .page-item:last-child { margin-left: 0 !important; }
+    div.dt-paging .page-link { padding: 0.375rem 0.45rem !important; font-size: 0.875rem !important; margin: 0 !important; min-width: 0 !important; line-height: 1.3 !important; }
     #table1 td { position: relative; min-height: 28px; word-break: break-word; white-space: normal; }
     #table1 td .cell-wrap { display: block; min-height: 24px; width: 100%; cursor: pointer; }
     #table1 .cell-wrap .cell-content { border-bottom: 1px dashed transparent; transition: border-color 0.2s; }
