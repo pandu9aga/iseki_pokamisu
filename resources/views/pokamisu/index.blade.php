@@ -87,9 +87,9 @@
                         <button class="color-btn preset-batch" style="background:#00B050" data-color="#00B050"></button>
                         <button class="color-btn preset-batch" style="background:#00B0F0" data-color="#00B0F0"></button>
                         <button class="color-btn preset-batch" style="background:#0000FF" data-color="#0000FF"></button>
-                        <button class="color-btn preset-batch" style="background:#002060" data-color="#002060"></button>
                         <button class="color-btn preset-batch" style="background:#7030A0" data-color="#7030A0"></button>
-                        <input type="color" id="batchColorPicker" value="#ff0000" title="Custom color">
+                        <button class="color-btn preset-batch" style="background:#000000" data-color="#000000"></button>
+                        <input type="color" id="batchColorPicker" value="#0000FF" title="Custom color">
                         <select id="batchColumnSelect" class="form-select form-select-sm" multiple style="min-width:180px;max-height:150px">
                             <option value="tanggal">Tanggal</option>
                             <option value="no">No</option>
@@ -169,10 +169,10 @@
         <button class="color-btn" style="background:#00B050" data-color="#00B050"></button>
         <button class="color-btn" style="background:#00B0F0" data-color="#00B0F0"></button>
         <button class="color-btn" style="background:#0000FF" data-color="#0000FF"></button>
-        <button class="color-btn" style="background:#002060" data-color="#002060"></button>
         <button class="color-btn" style="background:#7030A0" data-color="#7030A0"></button>
+        <button class="color-btn" style="background:#000000" data-color="#000000"></button>
     </div>
-    <div class="custom-color"><label class="form-label mb-0 me-1">Custom:</label><input type="color" id="customColorPicker" value="#000000"><button id="applyCustomColor" class="btn btn-sm btn-primary">Apply</button></div>
+    <div class="custom-color"><label class="form-label mb-0 me-1">Custom:</label><input type="color" id="customColorPicker" value="#0000FF"><button id="applyCustomColor" class="btn btn-sm btn-primary">Apply</button></div>
 </div>
 @endsection
 
