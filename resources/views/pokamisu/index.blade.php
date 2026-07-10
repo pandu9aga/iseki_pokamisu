@@ -159,7 +159,10 @@
 </div>
 
 <div class="color-popup" id="colorPopup">
-    <div class="fw-bold mb-2">Change Cell Color</div>
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <span class="fw-bold">Change Cell Color</span>
+        <button type="button" class="btn-close btn-sm" id="closeColorPopup"></button>
+    </div>
     <div class="preset-colors">
         <button class="color-btn" style="background:#C00000" data-color="#C00000"></button>
         <button class="color-btn" style="background:#FF0000" data-color="#FF0000"></button>
@@ -366,16 +369,17 @@ $(function() {
         if (l < 10) l = 10; if (l + pw > $(window).width()-10) l = $(window).width()-pw-10;
         var scrollTop = $(window).scrollTop();
         var viewH = $(window).height();
-        var tdBottom = off.top + $td.outerHeight();
-        var spaceBelow = (scrollTop + viewH) - tdBottom;
-        var spaceAbove = off.top - scrollTop;
+        var tdTopVp = off.top - scrollTop;
+        var tdBottomVp = tdTopVp + $td.outerHeight();
+        var spaceBelow = viewH - tdBottomVp;
+        var spaceAbove = tdTopVp;
         var t;
         if (spaceBelow >= ph + 10) {
-            t = tdBottom + 8;
+            t = tdBottomVp + 8;
         } else if (spaceAbove >= ph + 10) {
-            t = off.top - ph - 8;
+            t = tdTopVp - ph - 8;
         } else {
-            t = scrollTop + 10;
+            t = 10;
         }
         $('#customColorPicker').val(cellData.color);
         $('.color-btn').removeClass('active');
@@ -385,6 +389,7 @@ $(function() {
 
     $('#colorPopup .color-btn').on('click', function() { applyColorToActiveCell($(this).data('color')); $('#colorPopup').removeClass('show'); });
     $('#applyCustomColor').on('click', function() { applyColorToActiveCell($('#customColorPicker').val()); $('#colorPopup').removeClass('show'); });
+    $('#closeColorPopup').on('click', function() { $('#colorPopup').removeClass('show'); });
 
     function applyColorToActiveCell(color) {
         if (!activeCell) return;
