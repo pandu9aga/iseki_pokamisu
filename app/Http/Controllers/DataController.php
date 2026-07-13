@@ -310,4 +310,16 @@ class DataController extends Controller
 
         return response()->json(['success' => true]);
     }
+
+    public function batchDestroy(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:pokamisu,id',
+        ]);
+
+        $deleted = ImportData::whereIn('id', $request->ids)->delete();
+
+        return response()->json(['success' => true, 'deleted' => $deleted]);
+    }
 }

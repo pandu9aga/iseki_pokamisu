@@ -116,6 +116,7 @@
                             <option value="pic">PIC</option>
                         </select>
                         <button id="applyBatchColor" class="btn btn-primary btn-sm">Apply</button>
+                        <button id="batchDelete" class="btn btn-danger btn-sm"><i class="bi bi-trash"></i> Delete</button>
                         <button id="unselectAll" class="btn btn-secondary btn-sm">Unselect</button>
                     </div>
                 </div>
@@ -515,7 +516,30 @@ $(function() {
                 });
             }
         });
+        });
+
+    $('#batchDelete').on('click', function() {
+        var ids = Array.from(selectedIds);
+        if (!ids.length) return;
+        Swal.fire({
+            title: 'Hapus ' + ids.length + ' data?', text: 'Data yang dihapus tidak bisa dikembalikan!', icon: 'warning',
+            showCancelButton: true, confirmButtonColor: '#dc3545', cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Ya, hapus!', cancelButtonText: 'Batal'
+        }).then(function(r) {
+            if (r.isConfirmed) {
+                $.ajax({
+                    url: '{{ route('data.batch.destroy') }}', method: 'POST',
+                    data: { _token: '{{ csrf_token() }}', ids: ids },
+                    success: function(res) {
+                        Swal.fire('Terhapus!', res.deleted + ' data berhasil dihapus.', 'success');
+                        selectedIds.clear();
+                        table.ajax.reload(null, false);
+                    },
+                    error: function() { Swal.fire('Error', 'Gagal menghapus data', 'error'); }
+                });
+            }
+        });
     });
-});
+    });
 </script>
 @endpush

@@ -11,4 +11,5 @@ Route::post('/cell-color-update', [DataController::class, 'updateCellColor'])->n
 Route::post('/cell-value-update', [DataController::class, 'updateCellValue'])->name('data.cell.value');
 Route::post('/batch-update-color', [DataController::class, 'batchUpdateColor'])->name('data.batch.color');
 Route::post('/delete/{id}', [DataController::class, 'destroy'])->name('data.destroy');
+Route::post('/batch-delete', [DataController::class, 'batchDestroy'])->name('data.batch.destroy');
 Route::get('/colors/{column}', [DataController::class, 'getColors'])->name('data.colors');
