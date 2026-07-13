@@ -51,6 +51,10 @@
     .color-popup .preset-colors .color-btn:hover, .color-popup .preset-colors .color-btn.active { border-color: #435ebe; }
     .color-popup .custom-color { display: flex; align-items: center; gap: 8px; }
     .color-popup .custom-color input[type="color"] { width: 40px; height: 32px; border: none; padding: 0; cursor: pointer; }
+    #table1 thead { position: sticky; top: 0; z-index: 10; }
+    #table1 thead tr:first-child th { position: sticky; top: 0; z-index: 10; background: #f8f9fc; }
+    #table1 thead tr.filters th { position: sticky; top: 41px; z-index: 10; background: #f8f9fc; }
+    #table1 thead tr.filters th:after { display: none !important; }
 </style>
 @endpush
 
@@ -268,6 +272,9 @@ $(function() {
             var checked = $('.row-checkbox:checked').length;
             $('#selectAll').prop('checked', total > 0 && checked === total);
             updateBatchToolbar();
+        },
+        initComplete: function() {
+            $('#table1').parent().css({ 'max-height': 'calc(100vh - 370px)', 'overflow-y': 'auto' });
         }
     });
 
