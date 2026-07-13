@@ -16,6 +16,40 @@
     <link rel="stylesheet" href="{{ asset('assets/vendors/datatables/dataTables.dataTables.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/vendors/datatables/dataTables.bootstrap5.min.css') }}">
     <link rel="shortcut icon" href="{{ asset('assets/images/favicon.svg') }}" type="image/x-icon">
+    <style>
+        :root { --pink: #d63384; --pink-light: #f8e8f0; --pink-border: #c060a0; --pink-hover: #c5277a; }
+        .btn-primary { background-color: var(--pink) !important; border-color: var(--pink) !important; }
+        .btn-primary:hover, .btn-primary:focus { background-color: var(--pink-hover) !important; border-color: var(--pink-hover) !important; }
+        .btn-outline-primary { color: var(--pink) !important; border-color: var(--pink) !important; }
+        .btn-outline-primary:hover { background-color: var(--pink) !important; border-color: var(--pink) !important; color: #fff !important; }
+        a:not(.btn):not(.page-link) { color: var(--pink); }
+        a:not(.btn):not(.page-link):hover { color: var(--pink-hover); }
+        .text-primary { color: var(--pink) !important; }
+        .bg-primary { background-color: var(--pink) !important; }
+        .border-primary { border-color: var(--pink) !important; }
+        .page-item.active .page-link { background-color: var(--pink) !important; border-color: var(--pink) !important; }
+        .page-link:focus { box-shadow: 0 0 0 .25rem rgba(214, 51, 132, .25) !important; }
+        .nav-link.active { color: var(--pink) !important; }
+        .sidebar-item.active .sidebar-link { background-color: var(--pink) !important; }
+        .pagination.pagination-primary .page-item.active .page-link { background-color: var(--pink) !important; border-color: var(--pink) !important; box-shadow: 0 2px 5px rgba(214,51,132,.3) !important; }
+        .form-check-input:checked { background-color: var(--pink) !important; border-color: var(--pink) !important; }
+        .nav-tabs .nav-link.active { color: var(--pink) !important; }
+        .nav-tabs .nav-link.active:after { background-color: var(--pink) !important; }
+        .btn-light-primary { background-color: var(--pink-light) !important; color: #a03070 !important; }
+        .form-control:focus, .dataTable-input:focus { border-color: var(--pink) !important; box-shadow: 0 0 0 .25rem rgba(214,51,132,.25) !important; }
+        .form-group.with-title .form-control:focus~label { border-color: var(--pink) !important; }
+        .badge.bg-primary { background-color: var(--pink) !important; }
+        .alert-primary { background-color: var(--pink) !important; }
+        .dataTable-table thead th.dt-orderable-asc, .dataTable-table thead th.dt-orderable-desc { color: var(--pink) !important; }
+        .spinner-border.text-primary { color: var(--pink) !important; }
+        .page-item:not(.active) .page-link:hover { color: var(--pink) !important; }
+        .dropdown-item:hover, .dropdown-item:focus { background-color: var(--pink-light) !important; color: var(--pink) !important; }
+        .preset-batch.selected { border-color: var(--pink) !important; }
+        #table1 .cell-wrap .edit-input { border-color: var(--pink) !important; }
+        #table1 .edit-options { border-color: var(--pink) !important; }
+        #table1 .edit-options .edit-option.selected { background: var(--pink-light) !important; font-weight: bold; }
+        .batch-toolbar { background: var(--pink-light) !important; border-color: var(--pink-border) !important; }
+    </style>
     @stack('styles')
 </head>
 

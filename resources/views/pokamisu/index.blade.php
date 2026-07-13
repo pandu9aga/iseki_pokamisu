@@ -40,7 +40,7 @@
     #table1 .edit-options { list-style: none; margin: 2px 0 0 0; padding: 0; max-height: 180px; overflow-y: auto; border: 1px solid #435ebe; border-radius: 3px; background: #fff; }
     #table1 .edit-options .edit-option { padding: 3px 6px; cursor: pointer; font-size: 12px; }
     #table1 .edit-options .edit-option:hover,
-    #table1 .edit-options .edit-option.highlight { background: #eef1ff; }
+    #table1 .edit-options .edit-option.highlight { background: var(--pink-light); }
     #table1 .edit-options .edit-option.selected { background: #d0d9f0; font-weight: bold; }
     .batch-toolbar { display: none; background: #f0f4ff; border: 1px solid #d0d9f0; border-radius: 6px; padding: 12px 16px; margin-bottom: 16px; align-items: center; gap: 12px; }
     .batch-toolbar.show { display: flex; }
