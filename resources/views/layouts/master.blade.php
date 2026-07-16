@@ -176,10 +176,10 @@
             </div>
             <footer>
                 <div class="footer clearfix mb-0 text-muted">
-                    <div class="float-start">
+                    <div class="float-start ms-2">
                         <p>Iseki Pokamisu</p>
                     </div>
-                    <div class="float-end">
+                    <div class="float-end me-2">
                         <p>Iseki - 
                             <script>
                                 document.write(new Date().getFullYear());
