@@ -50,6 +50,14 @@
         #table1 .edit-options .edit-option.selected { background: var(--pink-light) !important; font-weight: bold; }
         .batch-toolbar { background: var(--pink-light) !important; border-color: var(--pink-border) !important; }
     </style>
+    <!-- Dynamic Favicon -->
+    <script src="/iseki_pro_app/js/dynamic-favicon.js"></script>
+    <script>document.addEventListener("DOMContentLoaded", function() { setDynamicFavicon("assignment", "Pokamisu"); });</script>
+
+    <!-- Dynamic Favicon Assets -->
+    <link rel="stylesheet" href="/iseki_pro_app/css/icon.css">
+    <script src="/iseki_pro_app/js/dynamic-favicon.js"></script>
+    <script>document.addEventListener("DOMContentLoaded", function() { setDynamicFavicon("assignment", "Pokamisu"); });</script>
     @stack('styles')
 </head>
 

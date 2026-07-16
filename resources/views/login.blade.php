@@ -35,6 +35,14 @@
         #auth #auth-right .auth-overlay-text p { opacity: 0.85; font-size: 1rem; }
         @media screen and (max-width: 991px) { #auth #auth-left { padding: 3rem 2rem; } #auth #auth-left .login-card { padding: 1.5rem; } }
     </style>
+    <!-- Dynamic Favicon -->
+    <script src="/iseki_pro_app/js/dynamic-favicon.js"></script>
+    <script>document.addEventListener("DOMContentLoaded", function() { setDynamicFavicon("assignment", "Pokamisu"); });</script>
+
+    <!-- Dynamic Favicon Assets -->
+    <link rel="stylesheet" href="/iseki_pro_app/css/icon.css">
+    <script src="/iseki_pro_app/js/dynamic-favicon.js"></script>
+    <script>document.addEventListener("DOMContentLoaded", function() { setDynamicFavicon("assignment", "Pokamisu"); });</script>
 </head>
 <body>
     <div id="auth">
