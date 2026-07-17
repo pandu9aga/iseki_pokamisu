@@ -31,8 +31,9 @@
                     <strong>Format Excel:</strong><br>
                     <ul class="mb-0">
                         <li>Cell <strong>B7</strong> berisi: <code>List Permasalahan Traktor Tgl: YYYY-MM-DD</code> (tanggal otomatis diekstrak)</li>
-                        <li>Header baris <strong>8</strong>: No | No Instruksi | Tipe Traktor | No. Produksi | Sign | Permasalahan | Keterangan | Jenis Penanganan | PIC Repair</li>
-                        <li>Data mulai dari <strong>baris 9</strong> (B9 = No, C9 = No Instruksi, ..., J9 = PIC Repair)</li>
+                        <li>Header baris <strong>8</strong>: No | No Instruksi | Tipe Traktor | No. Produksi | Sign | Permasalahan | Keterangan | Jenis Penanganan | PIC Repair | Kategori | Team</li>
+                        <li>Data mulai dari <strong>baris 9</strong> (B9 = No, C9 = No Instruksi, ..., J9 = PIC Repair, K9 = Kategori, L9 = Team)</li>
+                        <li>Warna untuk kolom <strong>Kategori, Team</strong> diambil dari <strong>warna background</strong> cell Excel (bukan warna font)</li>
                     </ul>
                 </div>
 

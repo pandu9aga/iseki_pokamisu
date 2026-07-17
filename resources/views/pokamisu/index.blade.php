@@ -202,6 +202,8 @@ $(function() {
         'pic_repair', 'kategori', 'team', 'pic'
     ];
 
+    const bgColumns = ['kategori'];
+
     dataColumns.forEach(function(col) {
         $.get('{{ url('colors') }}/' + col, function(colors) {
             var $wrap = $('.color-wrap').has('.cf-select[data-column="' + col + '"]');
@@ -349,13 +351,29 @@ $(function() {
     function getCellData(td) {
         var $span = $(td).find('.cell-content');
         if (!$span.length) return null;
+        var column = $span.data('column');
+        var color = $span.data('color') || '#000000';
+        if (bgColumns.includes(column)) {
+            var bg = $span.css('background-color');
+            if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
+                color = rgbToHex(bg) || color;
+            } else if (color === '#000000') {
+                color = '#ffffff';
+            }
+        }
         return {
-            id: $span.data('id'), column: $span.data('column'),
-            color: $span.data('color') || '#000000',
+            id: $span.data('id'), column: column,
+            color: color,
             text: $span.text().trim(), $span: $span,
             isSelect: $span.hasClass('is-select'),
             options: ($span.data('options') || '').split(',')
         };
+    }
+
+    function rgbToHex(rgb) {
+        var m = rgb.match(/\d+/g);
+        if (!m) return null;
+        return '#' + m.slice(0,3).map(function(x){ return ('0'+parseInt(x).toString(16)).slice(-2); }).join('');
     }
 
     $('#table1 tbody').on('contextmenu', 'td:not(:first-child):not(:last-child)', function(e) {
@@ -407,13 +425,28 @@ $(function() {
 
     function applyColorToActiveCell(color) {
         if (!activeCell) return;
-        activeCell.$span.css('color', color).data('color', color);
+        if (bgColumns.includes(activeCell.column)) {
+            activeCell.$span.css('background-color', color);
+            activeCell.$span.css('color', contrastText(color));
+        } else {
+            activeCell.$span.css('color', color);
+        }
+        activeCell.$span.data('color', color);
         $.ajax({
             url: '{{ route('data.cell.color') }}', method: 'POST',
             data: { _token: '{{ csrf_token() }}', id: activeCell.id, column: activeCell.column, color: color },
             error: function() { Swal.fire('Error', 'Gagal update warna', 'error'); }
         });
         activeCell = null;
+    }
+
+    function contrastText(hex) {
+        hex = hex.replace('#', '');
+        if (hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+        if (hex.length < 6) return '#000000';
+        var r = parseInt(hex.substr(0,2),16), g = parseInt(hex.substr(2,2),16), b = parseInt(hex.substr(4,2),16);
+        var lum = 0.299*r + 0.587*g + 0.114*b;
+        return lum > 140 ? '#000000' : '#ffffff';
     }
 
     $(document).on('click', function(e) {
@@ -423,7 +456,10 @@ $(function() {
     function enableInlineEdit(cellData) {
         var $td = cellData.$span.closest('td');
         $td.find('.cell-wrap').addClass('editing');
-        $td.find('.cell-content').html('<input type="text" class="edit-input" value="' + $('<span>').text(cellData.text).html() + '" style="color:' + cellData.color + '">');
+        var editStyle = bgColumns.includes(cellData.column)
+            ? 'background-color:' + cellData.color + ';color:' + contrastText(cellData.color)
+            : 'color:' + cellData.color;
+        $td.find('.cell-content').html('<input type="text" class="edit-input" value="' + $('<span>').text(cellData.text).html() + '" style="' + editStyle + '">');
         var $input = $td.find('.edit-input').focus().select();
         $input.on('blur', function() { saveValue($td, cellData.id, cellData.column, $input.val()); });
         $input.on('keydown', function(e) {
@@ -442,9 +478,12 @@ $(function() {
             var val = $('<span>').text(o).html();
             return '<li class="edit-option"' + sel + ' data-value="' + val + '">' + display + '</li>';
         }).join('');
+        var selEditStyle = bgColumns.includes(cellData.column)
+            ? 'background-color:' + cellData.color + ';color:' + contrastText(cellData.color)
+            : 'color:' + cellData.color;
         $td.find('.cell-content').html(
             '<div class="edit-select-wrap">' +
-                '<input type="text" class="edit-input" placeholder="Cari..." value="' + currentVal + '" style="color:' + cellData.color + '">' +
+                '<input type="text" class="edit-input" placeholder="Cari..." value="' + currentVal + '" style="' + selEditStyle + '">' +
                 '<ul class="edit-options">' + optsHtml + '</ul>' +
             '</div>'
         );

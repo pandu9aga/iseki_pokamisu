@@ -38,6 +38,41 @@ class DataController extends Controller
         }
     }
 
+    protected $bgColorColumns = ['kategori'];
+
+    private function isBgColorColumn($column)
+    {
+        return in_array($column, $this->bgColorColumns);
+    }
+
+    private function contrastTextColor($hex)
+    {
+        $hex = ltrim($hex, '#');
+        if (strlen($hex) === 3) {
+            $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+        }
+        if (strlen($hex) < 6) {
+            return '#000000';
+        }
+        $r = hexdec(substr($hex, 0, 2));
+        $g = hexdec(substr($hex, 2, 2));
+        $b = hexdec(substr($hex, 4, 2));
+        $luminance = 0.299 * $r + 0.587 * $g + 0.114 * $b;
+        return $luminance > 140 ? '#000000' : '#ffffff';
+    }
+
+    private function cellStyle($column, $color)
+    {
+        $color = $color ?: '#000000';
+        if ($this->isBgColorColumn($column)) {
+            if ($color === '#000000') {
+                return 'background-color:#ffffff;color:#000000';
+            }
+            return 'background-color:' . $color . ';color:' . $this->contrastTextColor($color);
+        }
+        return 'color:' . $color;
+    }
+
     public function index()
     {
         $kategoriList = $this->kategoriList;
@@ -82,15 +117,19 @@ class DataController extends Controller
             7 => 'keterangan', // H
             8 => 'jenis_penanganan', // I
             9 => 'pic_repair', // J
+            10 => 'kategori', // K
+            11 => 'team',     // L
         ];
 
-        $colLetters = [1=>'B',2=>'C',3=>'D',4=>'E',5=>'F',6=>'G',7=>'H',8=>'I',9=>'J'];
+        $colLetters = [1=>'B',2=>'C',3=>'D',4=>'E',5=>'F',6=>'G',7=>'H',8=>'I',9=>'J',10=>'K',11=>'L'];
+
+        $bgColorColumns = ['kategori'];
 
         $inserted = 0;
         foreach ($rows as $rowIdx => $row) {
             if ($rowIdx < 8) continue;
 
-            $data = ['tanggal' => $tanggal, 'tanggal_color' => '#000000'];
+            $data = ['tanggal' => $tanggal, 'tanggal_color' => null];
 
             foreach ($cols as $colIdx => $dbCol) {
                 $value = isset($row[$colIdx]) ? $row[$colIdx] : null;
@@ -100,21 +139,29 @@ class DataController extends Controller
 
                 $excelRow = $rowIdx + 1;
                 $letter = $colLetters[$colIdx];
-                $color = '#000000';
+                $color = null;
                 if ($letter && $value !== null) {
                     try {
                         $cell = $worksheet->getCell($letter . $excelRow);
-                        $fontColor = $cell->getStyle()->getFont()->getColor();
-                        if ($fontColor && $fontColor->getARGB() && $fontColor->getARGB() !== '00000000') {
-                            $argb = $fontColor->getARGB();
-                            $color = (strlen($argb) === 8) ? '#' . substr($argb, 2) : '#' . $argb;
+                        if (in_array($dbCol, $bgColorColumns)) {
+                            $fillColor = $cell->getStyle()->getFill()->getStartColor();
+                            if ($fillColor && $fillColor->getARGB() && $fillColor->getARGB() !== '00000000') {
+                                $argb = $fillColor->getARGB();
+                                $color = (strlen($argb) === 8) ? '#' . substr($argb, 2) : '#' . $argb;
+                            }
+                        } else {
+                            $fontColor = $cell->getStyle()->getFont()->getColor();
+                            if ($fontColor && $fontColor->getARGB() && $fontColor->getARGB() !== '00000000') {
+                                $argb = $fontColor->getARGB();
+                                $color = (strlen($argb) === 8) ? '#' . substr($argb, 2) : '#' . $argb;
+                            }
                         }
                     } catch (\Exception $e) {}
                 }
                 $data[$dbCol . '_color'] = $color;
             }
 
-            if (array_filter(array_intersect_key($data, array_flip(['no','no_instruksi','tipe_traktor','no_produksi','sign','permasalahan','keterangan','jenis_penanganan','pic_repair'])), function($v) { return $v !== null; })) {
+            if (array_filter(array_intersect_key($data, array_flip(['no','no_instruksi','tipe_traktor','no_produksi','sign','permasalahan','keterangan','jenis_penanganan','pic_repair','kategori','team'])), function($v) { return $v !== null; })) {
                 ImportData::create($data);
                 $inserted++;
             }
@@ -185,15 +232,15 @@ class DataController extends Controller
             })
             ->editColumn('kategori', function ($row) {
                 $opts = ',' . implode(',', $this->kategoriList);
-                return '<div class="cell-wrap"><span class="cell-content is-select" data-select="kategori" data-options="' . $opts . '" data-id="' . $row->id . '" data-column="kategori" data-color="' . $row->kategori_color . '" style="color:' . $row->kategori_color . '">' . e($row->kategori) . '</span></div>';
+                return '<div class="cell-wrap"><span class="cell-content is-select" data-select="kategori" data-options="' . $opts . '" data-id="' . $row->id . '" data-column="kategori" data-color="' . $row->kategori_color . '" style="' . $this->cellStyle('kategori', $row->kategori_color) . '">' . e($row->kategori) . '</span></div>';
             })
             ->editColumn('team', function ($row) {
                 $opts = ',' . implode(',', $this->teamList);
-                return '<div class="cell-wrap"><span class="cell-content is-select" data-select="team" data-options="' . $opts . '" data-id="' . $row->id . '" data-column="team" data-color="' . $row->team_color . '" style="color:' . $row->team_color . '">' . e($row->team) . '</span></div>';
+                return '<div class="cell-wrap"><span class="cell-content is-select" data-select="team" data-options="' . $opts . '" data-id="' . $row->id . '" data-column="team" data-color="' . $row->team_color . '" style="' . $this->cellStyle('team', $row->team_color) . '">' . e($row->team) . '</span></div>';
             })
             ->editColumn('pic', function ($row) {
                 $opts = ',' . implode(',', $this->getPICList());
-                return '<div class="cell-wrap"><span class="cell-content is-select" data-select="pic" data-options="' . $opts . '" data-id="' . $row->id . '" data-column="pic" data-color="' . $row->pic_color . '" style="color:' . $row->pic_color . '">' . e($row->pic) . '</span></div>';
+                return '<div class="cell-wrap"><span class="cell-content is-select" data-select="pic" data-options="' . $opts . '" data-id="' . $row->id . '" data-column="pic" data-color="' . $row->pic_color . '" style="' . $this->cellStyle('pic', $row->pic_color) . '">' . e($row->pic) . '</span></div>';
             })
             ->filterColumn('no', function ($query, $keyword) {
                 $query->where('no', 'like', "%{$keyword}%");
