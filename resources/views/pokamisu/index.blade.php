@@ -81,7 +81,10 @@
             <div class="card-header">
                 <div class="d-flex justify-content-between align-items-center">
                     <h4 class="card-title mb-0">Data Pokamisu</h4>
-                    <a href="{{ route('data.import.form') }}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Import Excel</a>
+                    <div class="d-flex gap-2">
+                        <button id="exportBtn" class="btn btn-success btn-sm"><i class="bi bi-file-earmark-excel"></i> Export Excel</button>
+                        <a href="{{ route('data.import.form') }}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Import Excel</a>
+                    </div>
                 </div>
             </div>
             <div class="card-body">
@@ -188,6 +191,13 @@
     </div>
     <div class="custom-color"><label class="form-label mb-0 me-1">Custom:</label><input type="color" id="customColorPicker" value="#0000FF"><button id="applyCustomColor" class="btn btn-sm btn-primary">Apply</button></div>
 </div>
+
+<form id="exportForm" action="{{ route('data.export') }}" method="POST" style="display:none">
+    @csrf
+    <input type="hidden" name="colorFilters" id="exportColorFilters">
+    <input type="hidden" name="columnFilters" id="exportColumnFilters">
+    <input type="hidden" name="search" id="exportSearch">
+</form>
 @endsection
 
 @push('scripts')
@@ -556,6 +566,32 @@ $(function() {
             }
         });
         });
+
+    $('#exportBtn').on('click', function() {
+        var colorFilters = {};
+        $('.cf-select').each(function() {
+            var val = $(this).val();
+            if (val) colorFilters[$(this).data('column')] = val;
+        });
+        $('#exportColorFilters').val(JSON.stringify(colorFilters));
+
+        var colIndexToName = {
+            1: 'tanggal', 2: 'no', 3: 'no_instruksi', 4: 'tipe_traktor',
+            5: 'no_produksi', 6: 'sign', 7: 'permasalahan', 8: 'keterangan',
+            9: 'jenis_penanganan', 10: 'pic_repair', 11: 'kategori',
+            12: 'team', 13: 'pic'
+        };
+        var columnFilters = {};
+        for (var i in colIndexToName) {
+            var val = table.column(i).search();
+            if (val) columnFilters[colIndexToName[i]] = val;
+        }
+        $('#exportColumnFilters').val(JSON.stringify(columnFilters));
+
+        $('#exportSearch').val(table.search());
+
+        $('#exportForm').submit();
+    });
 
     $('#batchDelete').on('click', function() {
         var ids = Array.from(selectedIds);

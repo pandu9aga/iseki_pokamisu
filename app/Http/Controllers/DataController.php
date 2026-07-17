@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\DataExport;
 use App\Imports\DataImport;
 use App\Models\ImportData;
 use Illuminate\Http\Request;
@@ -283,6 +284,57 @@ class DataController extends Controller
             })
             ->rawColumns(['checkbox', 'action', 'tanggal_display', 'no', 'no_instruksi', 'tipe_traktor', 'no_produksi', 'sign', 'permasalahan', 'keterangan', 'jenis_penanganan', 'pic_repair', 'kategori', 'team', 'pic'])
             ->make(true);
+    }
+
+    public function export(Request $request)
+    {
+        $query = ImportData::query();
+
+        if ($request->filled('colorFilters')) {
+            $colorFilters = is_string($request->colorFilters)
+                ? json_decode($request->colorFilters, true)
+                : $request->colorFilters;
+            if (is_array($colorFilters)) {
+                foreach ($colorFilters as $col => $color) {
+                    $query->where($col . '_color', $color);
+                }
+            }
+        }
+
+        if ($request->filled('columnFilters')) {
+            $columnFilters = is_string($request->columnFilters)
+                ? json_decode($request->columnFilters, true)
+                : $request->columnFilters;
+            if (is_array($columnFilters)) {
+                foreach ($columnFilters as $col => $val) {
+                    if ($val !== '') {
+                        $query->where($col, 'like', "%{$val}%");
+                    }
+                }
+            }
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('no', 'like', "%{$search}%")
+                  ->orWhere('no_instruksi', 'like', "%{$search}%")
+                  ->orWhere('tipe_traktor', 'like', "%{$search}%")
+                  ->orWhere('no_produksi', 'like', "%{$search}%")
+                  ->orWhere('sign', 'like', "%{$search}%")
+                  ->orWhere('permasalahan', 'like', "%{$search}%")
+                  ->orWhere('keterangan', 'like', "%{$search}%")
+                  ->orWhere('jenis_penanganan', 'like', "%{$search}%")
+                  ->orWhere('pic_repair', 'like', "%{$search}%")
+                  ->orWhere('kategori', 'like', "%{$search}%")
+                  ->orWhere('team', 'like', "%{$search}%")
+                  ->orWhere('pic', 'like', "%{$search}%");
+            });
+        }
+
+        $rows = $query->orderBy('no', 'asc')->get();
+
+        return Excel::download(new DataExport($rows), 'data-pokamisu.xlsx');
     }
 
     public function getColors($column)
