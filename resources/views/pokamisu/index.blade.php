@@ -82,6 +82,8 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <h4 class="card-title mb-0">Data Pokamisu</h4>
                     <div class="d-flex gap-2">
+                        <button id="clearFiltersBtn" class="btn btn-outline-secondary btn-sm"><i class="bi bi-x-circle"></i> Clear Filters</button>
+                        <button id="copyImageBtn" class="btn btn-info btn-sm"><i class="bi bi-image"></i> Copy as Image</button>
                         <button id="exportBtn" class="btn btn-success btn-sm"><i class="bi bi-file-earmark-excel"></i> Export Excel</button>
                         <a href="{{ route('data.import.form') }}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Import Excel</a>
                     </div>
@@ -198,9 +200,12 @@
     <input type="hidden" name="columnFilters" id="exportColumnFilters">
     <input type="hidden" name="search" id="exportSearch">
 </form>
+
+<div id="captureContainer" style="position:absolute;left:-9999px;top:0;width:auto;height:auto;white-space:nowrap"></div>
 @endsection
 
 @push('scripts')
+<script src="{{ asset('assets/vendors/html2canvas/html2canvas.min.js') }}"></script>
 <script>
 $(function() {
     let selectedIds = new Set();
@@ -591,6 +596,86 @@ $(function() {
         $('#exportSearch').val(table.search());
 
         $('#exportForm').submit();
+    });
+
+    $('#clearFiltersBtn').on('click', function() {
+        $('.column-filter').val('');
+        $('.cf-select').val('').trigger('change');
+        $('.cf-trigger .dot').css('background', '#fff');
+        $('#selectAll').prop('checked', false);
+        selectedIds.clear();
+        updateBatchToolbar();
+        table.search('').columns().search('').draw();
+    });
+
+    $('#copyImageBtn').on('click', function() {
+        var btn = $(this);
+        btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span>Loading...');
+
+        var colorFilters = {};
+        $('.cf-select').each(function() {
+            var val = $(this).val();
+            if (val) colorFilters[$(this).data('column')] = val;
+        });
+
+        var colIndexToName = {
+            1: 'tanggal', 2: 'no', 3: 'no_instruksi', 4: 'tipe_traktor',
+            5: 'no_produksi', 6: 'sign', 7: 'permasalahan', 8: 'keterangan',
+            9: 'jenis_penanganan', 10: 'pic_repair', 11: 'kategori',
+            12: 'team', 13: 'pic'
+        };
+        var columnFilters = {};
+        for (var i in colIndexToName) {
+            var val = table.column(i).search();
+            if (val) columnFilters[colIndexToName[i]] = val;
+        }
+
+        $.ajax({
+            url: '{{ route('data.export.html') }}', method: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}',
+                colorFilters: JSON.stringify(colorFilters),
+                columnFilters: JSON.stringify(columnFilters),
+                search: table.search()
+            },
+            success: function(res) {
+                if (!res.count) {
+                    Swal.fire('Info', 'Tidak ada data untuk dicopy.', 'info');
+                    btn.prop('disabled', false).html('<i class="bi bi-image"></i> Copy as Image');
+                    return;
+                }
+
+                var $container = $('#captureContainer');
+                $container.empty().append(res.html);
+
+                html2canvas($container[0], {
+                    scale: 2,
+                    useCORS: true,
+                    logging: false,
+                    width: $container.width(),
+                    height: $container.height()
+                }).then(function(canvas) {
+                    canvas.toBlob(function(blob) {
+                        navigator.clipboard.write([
+                            new ClipboardItem({ 'image/png': blob })
+                        ]).then(function() {
+                            Swal.fire('Sukses', 'Gambar tersalin ke clipboard!', 'success');
+                        }).catch(function() {
+                            Swal.fire('Info', 'Gambar siap. Gunakan Ctrl+V untuk paste.', 'info');
+                        });
+                    });
+                }).catch(function() {
+                    Swal.fire('Error', 'Gagal generate gambar', 'error');
+                }).finally(function() {
+                    $('#captureContainer').empty();
+                    btn.prop('disabled', false).html('<i class="bi bi-image"></i> Copy as Image');
+                });
+            },
+            error: function() {
+                Swal.fire('Error', 'Gagal mengambil data', 'error');
+                btn.prop('disabled', false).html('<i class="bi bi-image"></i> Copy as Image');
+            }
+        });
     });
 
     $('#batchDelete').on('click', function() {

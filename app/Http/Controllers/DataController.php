@@ -288,6 +288,54 @@ class DataController extends Controller
 
     public function export(Request $request)
     {
+        $rows = $this->applyFilters($request)->get();
+
+        return Excel::download(new DataExport($rows), 'data-pokamisu.xlsx');
+    }
+
+    public function exportHtml(Request $request)
+    {
+        $rows = $this->applyFilters($request)->get();
+
+        $html = '<table border="1" cellpadding="5" cellspacing="0" style="border-collapse:collapse;font-family:Arial;font-size:12px">';
+        $html .= '<thead><tr style="background:#f2f2f2;font-weight:bold">';
+        $headers = ['Tanggal','No','No Instruksi','Tipe Traktor','No Produksi','Sign','Permasalahan','Keterangan','Jenis Penanganan','PIC Repair','Kategori','Team','PIC'];
+        foreach ($headers as $h) {
+            $html .= '<th style="border:1px solid #ccc;padding:6px 8px">' . e($h) . '</th>';
+        }
+        $html .= '</tr></thead><tbody>';
+
+        $colKeys = ['tanggal','no','no_instruksi','tipe_traktor','no_produksi','sign','permasalahan','keterangan','jenis_penanganan','pic_repair','kategori','team','pic'];
+        $bgCols = ['kategori'];
+
+        foreach ($rows as $row) {
+            $html .= '<tr>';
+            foreach ($colKeys as $col) {
+                $val = e($row->$col ?? '');
+                $color = $row->{$col . '_color'} ?? null;
+                $style = '';
+                if ($color && $color !== '#000000') {
+                    if (in_array($col, $bgCols)) {
+                        $textColor = $this->contrastTextColor($color);
+                        $style = 'background-color:' . $color . ';color:' . $textColor;
+                    } else {
+                        $style = 'color:' . $color;
+                    }
+                }
+                $baseStyle = 'border:1px solid #ccc;padding:4px 8px';
+                $fullStyle = $style ? $baseStyle . ';' . $style : $baseStyle;
+                $html .= '<td style="' . $fullStyle . '">' . $val . '</td>';
+            }
+            $html .= '</tr>';
+        }
+
+        $html .= '</tbody></table>';
+
+        return response()->json(['html' => $html, 'count' => $rows->count()]);
+    }
+
+    private function applyFilters(Request $request)
+    {
         $query = ImportData::query();
 
         if ($request->filled('colorFilters')) {
@@ -332,9 +380,7 @@ class DataController extends Controller
             });
         }
 
-        $rows = $query->orderBy('no', 'asc')->get();
-
-        return Excel::download(new DataExport($rows), 'data-pokamisu.xlsx');
+        return $query->orderBy('no', 'asc');
     }
 
     public function getColors($column)

@@ -20,6 +20,7 @@ Route::middleware('simple.auth')->group(function () {
     Route::post('/delete/{id}', [DataController::class, 'destroy'])->name('data.destroy');
     Route::post('/batch-delete', [DataController::class, 'batchDestroy'])->name('data.batch.destroy');
     Route::post('/export', [DataController::class, 'export'])->name('data.export');
+    Route::post('/export-html', [DataController::class, 'exportHtml'])->name('data.export.html');
     Route::get('/colors/{column}', [DataController::class, 'getColors'])->name('data.colors');
 
     Route::prefix('users')->controller(UserController::class)->group(function () {
