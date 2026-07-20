@@ -281,7 +281,7 @@ $(function() {
             { data: 'kategori', name: 'kategori' }, { data: 'team', name: 'team' }, { data: 'pic', name: 'pic' },
             { data: 'action', name: 'action', orderable: false, searchable: false }
         ],
-        order: [[2, 'asc']], pageLength: 100,
+        order: [[1, 'desc'], [2, 'asc']], pageLength: 100,
         drawCallback: function() {
             $('.row-checkbox').each(function() {
                 $(this).prop('checked', selectedIds.has(parseInt($(this).val())));
