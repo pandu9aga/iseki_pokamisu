@@ -85,7 +85,7 @@
                         <button id="clearFiltersBtn" class="btn btn-outline-secondary btn-sm"><i class="bi bi-x-circle"></i> Clear Filters</button>
                         <button id="copyImageBtn" class="btn btn-info btn-sm"><i class="bi bi-image"></i> Copy as Image</button>
                         <button id="exportBtn" class="btn btn-success btn-sm"><i class="bi bi-file-earmark-excel"></i> Export Excel</button>
-                        <a href="{{ route('data.import.form') }}" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg"></i> Import Excel</a>
+                        <a href="{{ route('data.import.form') }}" class="btn btn-primary btn-sm"><i class="bi bi-plus"></i> Import Excel</a>
                     </div>
                 </div>
             </div>
